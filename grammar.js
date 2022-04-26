@@ -1,6 +1,9 @@
 module.exports = grammar({
   name: 'cairo',
   
+  // TODO: structs, const declarations, if/else etc, -> (range: (felt, felt)) declarations
+  // TODO: empty code blocks, for example @storage_var expressions
+  
   extras: $ => [/\s/, $.comment],
 
   rules: {
@@ -274,7 +277,7 @@ module.exports = grammar({
     func: $ => seq(
       optional($.decorator_list),
       $._funcdecl,
-      $.code_block,
+      optional($.code_block),
       "end"
     ),
 
