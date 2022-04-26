@@ -20,7 +20,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "arg_list_item",
@@ -47,10 +47,6 @@
         },
         {
           "type": "atom_dot",
-          "named": true
-        },
-        {
-          "type": "atom_func_call",
           "named": true
         },
         {
@@ -95,6 +91,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -156,10 +156,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -201,6 +197,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -247,10 +247,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -292,6 +288,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -334,10 +334,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -362,26 +358,15 @@
           "named": true
         },
         {
+          "type": "function_call",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
           "type": "number",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "atom_func_call",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "function_call",
           "named": true
         }
       ]
@@ -415,10 +400,6 @@
         },
         {
           "type": "atom_dot",
-          "named": true
-        },
-        {
-          "type": "atom_func_call",
           "named": true
         },
         {
@@ -466,6 +447,10 @@
           "named": true
         },
         {
+          "type": "function_call",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -490,7 +475,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "arg_list",
@@ -550,10 +535,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -598,6 +579,10 @@
           "named": true
         },
         {
+          "type": "function_call",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -622,7 +607,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "code_element_directive",
@@ -650,6 +635,10 @@
         },
         {
           "type": "code_element_return",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         }
       ]
@@ -799,10 +788,14 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "arg_list",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         }
       ]
@@ -859,10 +852,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -904,6 +893,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -946,10 +939,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -983,6 +972,10 @@
         },
         {
           "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1025,10 +1018,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1062,6 +1051,10 @@
         },
         {
           "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1104,10 +1097,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1133,6 +1122,10 @@
         },
         {
           "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1164,10 +1157,6 @@
         },
         {
           "type": "atom_dot",
-          "named": true
-        },
-        {
-          "type": "atom_func_call",
           "named": true
         },
         {
@@ -1212,6 +1201,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1281,6 +1274,10 @@
           "named": true
         },
         {
+          "type": "arg_list_item",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         }
@@ -1342,10 +1339,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1387,6 +1380,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1429,10 +1426,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1474,6 +1467,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1516,10 +1513,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1561,6 +1554,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1603,10 +1600,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1648,6 +1641,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1690,10 +1687,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1735,6 +1728,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1792,10 +1789,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1837,6 +1830,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1879,10 +1876,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -1924,6 +1917,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -1996,10 +1993,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -2045,6 +2038,10 @@
         },
         {
           "type": "expr_sub",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -2125,10 +2122,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -2154,6 +2147,10 @@
         },
         {
           "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -2196,10 +2193,6 @@
           "named": true
         },
         {
-          "type": "atom_func_call",
-          "named": true
-        },
-        {
           "type": "atom_hex_number",
           "named": true
         },
@@ -2225,6 +2218,10 @@
         },
         {
           "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
           "named": true
         },
         {
@@ -2340,6 +2337,10 @@
   },
   {
     "type": "abs",
+    "named": false
+  },
+  {
+    "type": "alloc_locals",
     "named": false
   },
   {

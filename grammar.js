@@ -9,6 +9,7 @@ module.exports = grammar({
     code_block: $ => repeat1($._code_element),
 
     _code_element: $ => choice(
+      'alloc_locals',
       $.code_element_member,
       $.code_element_reference,
       $.code_element_return,
@@ -16,6 +17,7 @@ module.exports = grammar({
       $.code_element_directive,
       $.code_element_import,
       $.code_element_instruction,
+      $.function_call
     ),
 
 
@@ -28,7 +30,8 @@ module.exports = grammar({
             optional(seq( ':', $.type, ','))
         )),
         $.identifier,
-        optional(seq( ':', $.type))
+        optional(seq( ':', $.type)),
+        optional(',')
       )),
       '}'
     ),
@@ -41,7 +44,8 @@ module.exports = grammar({
         ),
         $.identifier,
         ':',
-        $.type
+        $.type,
+        optional(',')
       )),
       ')'
     ),
@@ -140,19 +144,10 @@ module.exports = grammar({
     ),
 
     code_element_return: $ => seq(
-      'return', '(', optional($.arg_list), ')',
+      'return', choice($.arg_list, $.function_call)
     ),
 
-    arg_list: $ => choice(
-      $.arg_list_item,
-      seq(
-        $.arg_list_item,
-        repeat1(seq(
-          ',',
-          $.arg_list_item
-        ))
-      )
-    ),
+    arg_list: $ => seq('(', sep(',', $.arg_list_item), ')'),
 
     arg_list_item: $ => $._expr_assignment,
 
@@ -182,13 +177,13 @@ module.exports = grammar({
     )),
 
     _atom: $ => prec(5, choice(
+      $.identifier,
       $._atom_number,
       $.atom_hex_number,
       $.atom_short_string,
       $.atom_hint,
       $.atom_reg,
-      $.atom_func_call,
-      $.identifier,
+      $.function_call,
       $.atom_deref,
       $.atom_subscript,
       $.atom_dot,
@@ -232,9 +227,7 @@ module.exports = grammar({
       'cast', '(', $._expr, ',', $.type, ')'
     ),
 
-    atom_tuple_or_parentheses: $ => seq(
-      '(', optional($.arg_list), ')',
-    ),
+    atom_tuple_or_parentheses: $ => $.arg_list,
 
     expr_pow: $ => seq(
       $._atom, '**', $._pow
@@ -270,13 +263,13 @@ module.exports = grammar({
       seq($._identifier_def, '=', $._expr)
     ),
 
-    function_call: $ => seq(
+    function_call: $ => prec(6, seq(
       $.identifier,
       optional(seq(
-        '{', $.arg_list, '}'
+        '{', sep(',', $.arg_list_item), '}'
       )),
-      '(', optional($.arg_list), ')',
-    ),
+      $.arg_list
+    )),
 
     func: $ => seq(
       optional($.decorator_list),
@@ -330,9 +323,9 @@ module.exports = grammar({
     ),
 
     call_instruction: $ => choice(
-      seq( "call", "rel", $._expr),
-      seq( "call", "abs", $._expr),
-      seq( "call", $.identifier)
+      seq("call", "rel", $._expr),
+      seq("call", "abs", $._expr),
+      seq("call", $.identifier)
     ),
 
     typed_identifier: $ => seq(
@@ -373,3 +366,11 @@ module.exports = grammar({
     comment: $ => token(seq('#', /.*/)),
   }
 });
+
+function sep(separator, rule) {
+  return optional(sep1(separator, rule));
+}
+
+function sep1(separator, rule) {
+  return seq(rule, repeat(seq(separator, rule)));
+}
