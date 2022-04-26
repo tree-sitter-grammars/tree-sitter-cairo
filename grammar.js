@@ -1,5 +1,7 @@
 module.exports = grammar({
   name: 'cairo',
+  
+  extras: $ => [/\s/, $.comment],
 
   rules: {
     cairo_file: $ => $.code_block,
@@ -367,5 +369,7 @@ module.exports = grammar({
     word: $ => $.identifier,
 
     number: $ => /\d+/,
+
+    comment: $ => token(seq('#', /.*/)),
   }
 });

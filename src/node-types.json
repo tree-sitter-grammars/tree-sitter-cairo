@@ -2367,6 +2367,10 @@
     "named": false
   },
   {
+    "type": "comment",
+    "named": true
+  },
+  {
     "type": "dw",
     "named": false
   },
