@@ -133,11 +133,7 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "type",
+          "type": "typed_identifier",
           "named": true
         }
       ]
@@ -1968,11 +1964,7 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "type",
+          "type": "typed_identifier",
           "named": true
         }
       ]

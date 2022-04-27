@@ -35,35 +35,9 @@ module.exports = grammar({
       $.code_element_instruction,
     ),
 
+    implicit_arguments: $ => seq('{', sep(",", $.typed_identifier), '}'),
 
-    implicit_arguments: $ => seq(
-      '{',
-      optional(seq(
-        repeat(
-          seq(
-            $.identifier,
-            optional(seq( ':', $.type, ','))
-        )),
-        $.identifier,
-        optional(seq( ':', $.type)),
-        optional(',')
-      )),
-      '}'
-    ),
-
-    arguments: $ => seq(
-      '(',
-      optional(seq(
-        repeat(
-          seq( $.identifier, ':', $.type, ',')
-        ),
-        $.identifier,
-        ':',
-        $.type,
-        optional(',')
-      )),
-      ')'
-    ),
+    arguments: $ => seq('(', sep(",", $.typed_identifier), ')'),
     
     
     named_type: $ => prec(1, choice(
@@ -351,7 +325,7 @@ module.exports = grammar({
 
     _ref_binding: $ => choice(
       $.typed_identifier,
-      seq( "(", $.typed_identifier, ")")
+      seq( "(", sep(",", $.typed_identifier), ")")
     ),
 
     code_element_reference: $ => seq(
@@ -423,10 +397,7 @@ module.exports = grammar({
     typed_identifier: $ => seq(
       optional("local"),
       $.identifier_def,
-      optional(seq(
-        ":",
-        $.type
-      ))
+      optional(seq(":", $.type))
     ),
 
     tuple: $ => seq(
