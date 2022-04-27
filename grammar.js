@@ -1,8 +1,8 @@
 module.exports = grammar({
   name: 'cairo',
-  
-  // TODO: if/else etc, -> (range: (felt, felt)) declarations
-  
+ 
+  // Based on https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/lang/compiler/cairo.ebnf  
+
   extras: $ => [/\s/, $.comment],
 
   rules: {
@@ -13,14 +13,20 @@ module.exports = grammar({
     _code_element: $ => choice(
       'alloc_locals',
       $.code_element_struct,
+      $.code_element_member,
       $.code_element_const,
       $.code_element_reference,
+      $.code_element_local_var,
+      $.code_element_temp_var,
+      // TODO: assert, static_assert
       $.code_element_return,
+      // TODO: split return into normal + function return
+      $.code_element_if,
+      $.function_call,
       $.code_element_function,
       $.code_element_directive,
       $.code_element_import,
       $.code_element_instruction,
-      $.function_call
     ),
 
 
@@ -52,12 +58,27 @@ module.exports = grammar({
       )),
       ')'
     ),
+    
+    
+    named_type: $ => prec(1, choice(
+      seq(
+        $.identifier,
+        optional(seq(":", $.type)),
+      ),
+      $.non_identifier_type,
+    )),
 
-    type: $ => choice(
+    non_identifier_type: $ => choice(
       'felt',
       $.identifier, // structure
       seq( $.type, '*'),
-      seq( $.type, '**')
+      seq( $.type, '**'),
+      seq("(", sep1(",", $.named_type), ")")
+    ),
+    
+    type: $ => choice(
+      $.non_identifier_type,
+      $.named_type,
     ),
 
     code_element_instruction: $ => choice(
@@ -96,13 +117,13 @@ module.exports = grammar({
       'jmp', $.identifier,
     ),
 
-    inst_jnz: $ => seq(
+    inst_jnz: $ => prec(1, seq(
       'jmp', 'rel', $._expr, 'if', $._expr, '!=', $.number,
-    ),
+    )),
 
-    inst_jnz_to_label: $ => seq(
+    inst_jnz_to_label: $ => prec(1, seq(
       'jmp', $.identifier, 'if', $._expr, '!=', $.number,
-    ),
+    )),
 
     inst_ret: $ => 'ret',
 
@@ -114,17 +135,14 @@ module.exports = grammar({
       'dw', $._expr,
     ),
 
-
-
     code_element_import: $ => seq(
       'from', $._identifier_def, 'import', $.import_body,
     ),
 
     import_body: $ => seq(
-      $.aliased_identifier,
       choice(
-        repeat(seq( ',', $.aliased_identifier,)),
-        seq("(", repeat(seq( ',', $.aliased_identifier,)), ")"), // optional set of parentheses
+        seq("(", sep1(',', $.aliased_identifier), ")"), // optional set of parentheses
+        sep1(',', $.aliased_identifier),
       )
     ),
 
@@ -147,6 +165,17 @@ module.exports = grammar({
 
     lang_directive: $ => seq(
       '%lang', $.identifier
+    ),
+    
+    bool_expr: $ => choice(
+      seq($._expr, "==", $._expr),
+      seq($._expr, "!=", $._expr)
+    ),
+
+    code_element_if: $ => seq(
+      "if", $.bool_expr, ":", $.code_block,
+      optional(seq("else", ":", $.code_block)),
+      "end"
     ),
 
     code_element_return: $ => seq(
@@ -316,12 +345,20 @@ module.exports = grammar({
       "let", $._ref_binding, "=", $.rvalue,
     ),
 
+    code_element_local_var: $ => seq(
+      "local", $.typed_identifier, optional(seq("=", $._expr)),
+    ),
+
+    code_element_temp_var: $ => seq(
+      "tempvar", $.typed_identifier, optional(seq("=", $._expr)),
+    ),
+
     code_element_const: $ => seq(
       "const", $.identifier, "=", $.number
     ),
 
     code_element_struct: $ => seq(
-      "struct", $.identifier, ":", repeat($.code_element_member), "end"
+      choice("struct", "namespace"), $._identifier_def, ":", repeat($.code_element_member), "end"
     ),
 
     code_element_member: $ => seq(
