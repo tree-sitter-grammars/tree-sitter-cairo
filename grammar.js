@@ -122,7 +122,10 @@ module.exports = grammar({
 
     import_body: $ => seq(
       $.aliased_identifier,
-      repeat(seq( ',', $.aliased_identifier,))
+      choice(
+        repeat(seq( ',', $.aliased_identifier,)),
+        seq("(", repeat(seq( ',', $.aliased_identifier,)), ")"), // optional set of parentheses
+      )
     ),
 
     aliased_identifier: $ => seq(
