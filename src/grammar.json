@@ -318,8 +318,8 @@
           "value": "felt"
         },
         {
-          "type": "SYMBOL",
-          "name": "identifier"
+          "type": "STRING",
+          "value": "codeoffset"
         },
         {
           "type": "SEQ",
@@ -1034,6 +1034,10 @@
           {
             "type": "SYMBOL",
             "name": "unary_neg"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "unary_new_operator"
           }
         ]
       }
@@ -1282,6 +1286,19 @@
         {
           "type": "STRING",
           "value": "-"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_unary"
+        }
+      ]
+    },
+    "unary_new_operator": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "new"
         },
         {
           "type": "SYMBOL",

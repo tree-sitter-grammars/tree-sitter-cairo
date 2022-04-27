@@ -116,6 +116,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -226,6 +230,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -236,7 +244,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "atom_cast",
@@ -312,6 +320,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -473,6 +485,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -574,6 +590,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -691,6 +711,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -861,6 +885,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -1095,6 +1123,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -1235,6 +1267,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -1344,6 +1380,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -1523,6 +1563,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -1602,6 +1646,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -1680,6 +1728,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -1830,6 +1882,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -2020,6 +2076,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2106,6 +2166,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -2194,6 +2258,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2281,6 +2349,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2367,6 +2439,10 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -2470,6 +2546,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2557,6 +2637,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2607,10 +2691,6 @@
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "identifier",
-          "named": true
-        },
         {
           "type": "named_type",
           "named": true
@@ -2724,6 +2804,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2833,6 +2917,10 @@
         {
           "type": "unary_neg",
           "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
         }
       ]
     }
@@ -2903,6 +2991,85 @@
         },
         {
           "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "unary_new_operator",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "atom_cast",
+          "named": true
+        },
+        {
+          "type": "atom_deref",
+          "named": true
+        },
+        {
+          "type": "atom_dot",
+          "named": true
+        },
+        {
+          "type": "atom_hex_number",
+          "named": true
+        },
+        {
+          "type": "atom_hint",
+          "named": true
+        },
+        {
+          "type": "atom_reg",
+          "named": true
+        },
+        {
+          "type": "atom_short_string",
+          "named": true
+        },
+        {
+          "type": "atom_subscript",
+          "named": true
+        },
+        {
+          "type": "atom_tuple_or_parentheses",
+          "named": true
+        },
+        {
+          "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "unary_addressof",
+          "named": true
+        },
+        {
+          "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -3041,6 +3208,10 @@
     "named": false
   },
   {
+    "type": "codeoffset",
+    "named": false
+  },
+  {
     "type": "comment",
     "named": true
   },
@@ -3106,6 +3277,10 @@
   },
   {
     "type": "namespace",
+    "named": false
+  },
+  {
+    "type": "new",
     "named": false
   },
   {

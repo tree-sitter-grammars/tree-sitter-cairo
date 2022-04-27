@@ -210,6 +210,7 @@ module.exports = grammar({
       $._pow,
       $.unary_addressof,
       $.unary_neg,
+      $.unary_new_operator,
     )),
 
     _pow: $ => prec(4, choice(
@@ -282,6 +283,10 @@ module.exports = grammar({
 
     unary_neg: $ => seq(
       '-', $._unary,
+    ),
+
+    unary_new_operator: $ => seq(
+      'new', $._unary,
     ),
 
     expr_mul: $ => seq(
