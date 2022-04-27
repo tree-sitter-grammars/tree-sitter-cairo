@@ -632,7 +632,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "identifier_def"
+          "name": "identifier"
         },
         {
           "type": "STRING",

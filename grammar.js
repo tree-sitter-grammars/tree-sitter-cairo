@@ -137,7 +137,7 @@ module.exports = grammar({
     ),
 
     code_element_import: $ => seq(
-      'from', $.identifier_def, 'import', $.import_body,
+      'from', $.identifier, 'import', $.import_body,
     ),
 
     import_body: $ => seq(

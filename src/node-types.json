@@ -840,7 +840,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier_def",
+          "type": "identifier",
           "named": true
         },
         {
