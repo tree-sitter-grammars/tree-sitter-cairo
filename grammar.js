@@ -76,7 +76,7 @@ module.exports = grammar({
 
     non_identifier_type: $ => choice(
       'felt',
-      $.identifier, // structure
+      'codeoffset',
       seq( $.type, '*'),
       seq( $.type, '**'),
       seq("(", sep1(",", $.named_type), ")")
