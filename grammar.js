@@ -1,8 +1,7 @@
 module.exports = grammar({
   name: 'cairo',
   
-  // TODO: structs, const declarations, if/else etc, -> (range: (felt, felt)) declarations
-  // TODO: empty code blocks, for example @storage_var expressions
+  // TODO: if/else etc, -> (range: (felt, felt)) declarations
   
   extras: $ => [/\s/, $.comment],
 
@@ -14,6 +13,7 @@ module.exports = grammar({
     _code_element: $ => choice(
       'alloc_locals',
       $.code_element_struct,
+      $.code_element_const,
       $.code_element_reference,
       $.code_element_return,
       $.code_element_function,
@@ -311,6 +311,10 @@ module.exports = grammar({
 
     code_element_reference: $ => seq(
       "let", $._ref_binding, "=", $.rvalue,
+    ),
+
+    code_element_const: $ => seq(
+      "const", $.identifier, "=", $.number
     ),
 
     code_element_struct: $ => seq(
