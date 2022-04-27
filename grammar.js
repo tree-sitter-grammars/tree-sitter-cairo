@@ -192,7 +192,7 @@ module.exports = grammar({
 
     arg_list_item: $ => $._expr_assignment,
 
-    _expr: $ => prec.left(2, $._sum),
+    _expr: $ => prec.right(2, $._sum),
 
     _sum: $ => prec(1, choice(
       $._product,
@@ -289,21 +289,21 @@ module.exports = grammar({
       'new', $._unary,
     ),
 
-    expr_mul: $ => seq(
+    expr_mul: $ => prec(3, seq(
       $._product, '*', $._unary
-    ),
+    )),
 
-    expr_div: $ => seq(
+    expr_div: $ => prec(3, seq(
       $._product, '/', $._unary
-    ),
+    )),
 
-    expr_add: $ =>  seq(
+    expr_add: $ =>  prec(2, seq(
       $._sum, '+', $._product
-    ),
+    )),
 
-    expr_sub: $ => seq(
+    expr_sub: $ => prec(2, seq(
       $._sum, '-', $._product,
-    ),
+    )),
 
 
     _expr_assignment: $ => choice(
