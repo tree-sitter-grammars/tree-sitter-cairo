@@ -233,9 +233,9 @@ module.exports = grammar({
       ']',
     ),
 
-    atom_subscript: $ => seq(
+    atom_subscript: $ => prec(5, seq(
       $._atom, '[', $._expr, ']',
-    ),
+    )),
 
     atom_dot: $ => seq(
       $._atom, '.', $.identifier_def,
