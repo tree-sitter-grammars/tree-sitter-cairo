@@ -13,18 +13,23 @@ module.exports = grammar({
 
     _code_element: $ => choice(
       'alloc_locals',
-      $.code_element_struct,
       $.code_element_member,
       $.code_element_const,
       $.code_element_reference,
       $.code_element_local_var,
       $.code_element_temp_var,
-      // TODO: assert, static_assert
+      $.code_element_compound_assert_eq,
+      $.code_element_static_assert,
       $.code_element_return,
       // TODO: split return into normal + function return
       $.code_element_if,
       $.function_call,
       $.code_element_function,
+      $.code_element_struct,
+      $.code_element_typedef,
+      $.code_element_with_attr_statement,
+      $.code_element_with_statement,
+      // TODO: hint
       $.code_element_directive,
       $.code_element_import,
       $.code_element_instruction,
@@ -231,6 +236,8 @@ module.exports = grammar({
 
     atom_hex_number: $ => /0x[a-f|A-F|0-9]*/,
 
+    string: $ => /"(.*?)"/,
+
     atom_short_string: $ => /'(.*?)'/,
 
     atom_hint: $ => seq(
@@ -354,12 +361,40 @@ module.exports = grammar({
       "tempvar", $.typed_identifier, optional(seq("=", $._expr)),
     ),
 
+    code_element_compound_assert_eq: $ => seq(
+      "assert", $._expr, "=", $._expr,
+    ),
+
+    code_element_static_assert: $ => seq(
+      "static_assert", $._expr, "==", $._expr,
+    ),
+
     code_element_const: $ => seq(
       "const", $.identifier, "=", $.number
     ),
 
     code_element_struct: $ => seq(
       choice("struct", "namespace"), $.identifier_def, ":", repeat($.code_element_member), "end"
+    ),
+
+    code_element_typedef: $ => seq(
+      "using", $.identifier_def, "=", $.type,
+    ),
+
+    _attr_val: $ => seq(
+      "(", optional($.string), ")"
+    ),
+
+    code_element_with_attr_statement: $ => seq(
+      "with_attr", $.identifier_def, optional($._attr_val), ":",
+      $.code_block,
+      "end"
+    ),
+
+    code_element_with_statement: $ => seq(
+      "with", sep1(",", $.aliased_identifier), ":",
+      $.code_block,
+      "end"
     ),
 
     code_element_member: $ => seq(
