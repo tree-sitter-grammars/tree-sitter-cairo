@@ -626,15 +626,15 @@
           "named": true
         },
         {
-          "type": "code_element_member",
-          "named": true
-        },
-        {
           "type": "code_element_reference",
           "named": true
         },
         {
           "type": "code_element_return",
+          "named": true
+        },
+        {
+          "type": "code_element_struct",
           "named": true
         },
         {
@@ -796,6 +796,25 @@
         },
         {
           "type": "function_call",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "code_element_struct",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "code_element_member",
+          "named": true
+        },
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -2441,6 +2460,10 @@
   },
   {
     "type": "return",
+    "named": false
+  },
+  {
+    "type": "struct",
     "named": false
   },
   {

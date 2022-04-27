@@ -13,7 +13,7 @@ module.exports = grammar({
 
     _code_element: $ => choice(
       'alloc_locals',
-      $.code_element_member,
+      $.code_element_struct,
       $.code_element_reference,
       $.code_element_return,
       $.code_element_function,
@@ -311,6 +311,10 @@ module.exports = grammar({
 
     code_element_reference: $ => seq(
       "let", $._ref_binding, "=", $.rvalue,
+    ),
+
+    code_element_struct: $ => seq(
+      "struct", $.identifier, ":", repeat($.code_element_member), "end"
     ),
 
     code_element_member: $ => seq(
