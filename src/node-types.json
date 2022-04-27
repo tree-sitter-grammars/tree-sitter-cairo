@@ -8,7 +8,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         }
       ]
@@ -99,6 +99,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "identifier_def",
           "named": true
         },
         {
@@ -363,6 +367,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "identifier_def",
           "named": true
         },
         {
@@ -832,7 +840,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         },
         {
@@ -1050,7 +1058,7 @@
           "named": true
         },
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         }
       ]
@@ -1152,11 +1160,11 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         }
       ]
@@ -1593,7 +1601,7 @@
           "named": true
         },
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         },
         {
@@ -1629,6 +1637,16 @@
         }
       ]
     }
+  },
+  {
+    "type": "identifier",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "identifier_def",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "implicit_arguments",
@@ -2483,7 +2501,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "identifier_def",
           "named": true
         },
         {
@@ -2798,10 +2816,6 @@
   {
     "type": "func",
     "named": false
-  },
-  {
-    "type": "identifier",
-    "named": true
   },
   {
     "type": "if",

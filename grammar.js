@@ -1,3 +1,4 @@
+const IDENTIFIER = /[a-zA-Z_][a-zA-Z_0-9]*/;
 module.exports = grammar({
   name: 'cairo',
  
@@ -136,7 +137,7 @@ module.exports = grammar({
     ),
 
     code_element_import: $ => seq(
-      'from', $._identifier_def, 'import', $.import_body,
+      'from', $.identifier_def, 'import', $.import_body,
     ),
 
     import_body: $ => seq(
@@ -147,10 +148,10 @@ module.exports = grammar({
     ),
 
     aliased_identifier: $ => seq(
-      $._identifier_def,
+      $.identifier_def,
       optional(seq(
         'as',
-        $._identifier_def
+        $.identifier_def
       ))
     ),
 
@@ -255,7 +256,7 @@ module.exports = grammar({
     ),
 
     atom_dot: $ => seq(
-      $._atom, '.', $._identifier_def,
+      $._atom, '.', $.identifier_def,
     ),
 
     atom_cast: $ => seq(
@@ -295,7 +296,7 @@ module.exports = grammar({
 
     _expr_assignment: $ => choice(
       $._expr,
-      seq($._identifier_def, '=', $._expr)
+      seq($.identifier_def, '=', $._expr)
     ),
 
     function_call: $ => prec(6, seq(
@@ -319,12 +320,12 @@ module.exports = grammar({
 
     decorator: $ => seq(
       '@',
-      $._identifier_def
+      $.identifier_def
     ),
 
     _funcdecl: $ => seq(
       "func",
-      $._identifier_def,
+      $.identifier_def,
       optional($.implicit_arguments),
       $.arguments,
       optional($.returns),
@@ -358,7 +359,7 @@ module.exports = grammar({
     ),
 
     code_element_struct: $ => seq(
-      choice("struct", "namespace"), $._identifier_def, ":", repeat($.code_element_member), "end"
+      choice("struct", "namespace"), $.identifier_def, ":", repeat($.code_element_member), "end"
     ),
 
     code_element_member: $ => seq(
@@ -381,7 +382,7 @@ module.exports = grammar({
 
     typed_identifier: $ => seq(
       optional("local"),
-      $._identifier_def,
+      $.identifier_def,
       optional(seq(
         ":",
         $.type
@@ -400,15 +401,9 @@ module.exports = grammar({
       ')',
     ),
 
-    _identifier_def: $ => prec.left(2, seq(
-      $.identifier,
-      repeat(seq(
-        '.',
-        $.identifier
-      ))
-    )),
+    identifier_def: $ => IDENTIFIER,
 
-    identifier: $ => /[a-zA-Z_][a-zA-Z_0-9]*/,
+    identifier: $ => prec.right(1, sep1(".", IDENTIFIER)),
 
     word: $ => $.identifier,
 
