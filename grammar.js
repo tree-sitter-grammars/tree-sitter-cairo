@@ -356,7 +356,7 @@ module.exports = grammar({
     code_element_struct: $ => seq(
       optional($.decorator_list),
       choice("struct", "namespace"), $.identifier_def, ":",
-      $.code_block,
+      optional($.code_block),
       "end"
     ),
 

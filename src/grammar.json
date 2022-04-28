@@ -1812,8 +1812,16 @@
           "value": ":"
         },
         {
-          "type": "SYMBOL",
-          "name": "code_block"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "code_block"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         },
         {
           "type": "STRING",
