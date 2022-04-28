@@ -731,17 +731,24 @@
       ]
     },
     "builtin_directive": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "%builtins"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "identifier"
-        }
-      ]
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "%builtins"
+          },
+          {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "identifier"
+            }
+          }
+        ]
+      }
     },
     "lang_directive": {
       "type": "SEQ",
@@ -1764,7 +1771,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "number"
+          "name": "_expr"
         }
       ]
     },

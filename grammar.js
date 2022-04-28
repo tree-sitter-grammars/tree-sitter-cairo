@@ -143,9 +143,9 @@ module.exports = grammar({
       $.lang_directive,
     ),
 
-    builtin_directive: $ => seq(
-      '%builtins', $.identifier
-    ),
+    builtin_directive: $ => prec.right(seq(
+      '%builtins', repeat1($.identifier)
+    )),
 
     lang_directive: $ => seq(
       '%lang', $.identifier
@@ -350,7 +350,7 @@ module.exports = grammar({
     ),
 
     code_element_const: $ => seq(
-      "const", $.identifier, "=", $.number
+      "const", $.identifier, "=", $._expr
     ),
 
     code_element_struct: $ => seq(
