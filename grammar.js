@@ -386,7 +386,6 @@ module.exports = grammar({
 
     code_element_function: $ => $.func,
 
-
     rvalue: $ => choice(
       $.call_instruction,
       $._expr,
@@ -402,18 +401,6 @@ module.exports = grammar({
       optional("local"),
       $.identifier_def,
       optional(seq(":", $.type))
-    ),
-
-    tuple: $ => seq(
-      '(',
-      optional(seq(
-        optional(' '),
-        $.type,
-        optional(' '),
-        ',',
-        optional(' ')
-      )),
-      ')',
     ),
 
     identifier_def: $ => IDENTIFIER,
