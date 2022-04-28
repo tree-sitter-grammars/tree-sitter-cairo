@@ -354,7 +354,10 @@ module.exports = grammar({
     ),
 
     code_element_struct: $ => seq(
-      choice("struct", "namespace"), $.identifier_def, ":", repeat($.code_element_member), "end"
+      optional($.decorator_list),
+      choice("struct", "namespace"), $.identifier_def, ":",
+      $.code_block,
+      "end"
     ),
 
     code_element_typedef: $ => seq(

@@ -1381,7 +1381,11 @@
       "required": true,
       "types": [
         {
-          "type": "code_element_member",
+          "type": "code_block",
+          "named": true
+        },
+        {
+          "type": "decorator_list",
           "named": true
         },
         {

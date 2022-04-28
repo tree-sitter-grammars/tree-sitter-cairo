@@ -1782,6 +1782,18 @@
           "type": "CHOICE",
           "members": [
             {
+              "type": "SYMBOL",
+              "name": "decorator_list"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
               "type": "STRING",
               "value": "struct"
             },
@@ -1800,11 +1812,8 @@
           "value": ":"
         },
         {
-          "type": "REPEAT",
-          "content": {
-            "type": "SYMBOL",
-            "name": "code_element_member"
-          }
+          "type": "SYMBOL",
+          "name": "code_block"
         },
         {
           "type": "STRING",
