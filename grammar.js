@@ -29,7 +29,7 @@ module.exports = grammar({
       $.code_element_typedef,
       $.code_element_with_attr_statement,
       $.code_element_with_statement,
-      // TODO: hint
+      $.code_element_hint,
       $.code_element_directive,
       $.code_element_import,
       $.code_element_instruction,
@@ -134,6 +134,10 @@ module.exports = grammar({
       ))
     ),
 
+    hint: $ => seq("%{", field("body", repeat(/.+/)), "%}"),
+
+    code_element_hint: $ => $.hint,
+
     code_element_directive: $ => choice(
       $.builtin_directive,
       $.lang_directive,
@@ -215,10 +219,7 @@ module.exports = grammar({
 
     atom_short_string: $ => /'(.*?)'/,
 
-    atom_hint: $ => seq(
-      'nondet',
-      /%\{(.*?)%\}/s,
-    ),
+    atom_hint: $ => seq('nondet', $.hint),
 
     atom_reg: $ => choice(
       'ap',

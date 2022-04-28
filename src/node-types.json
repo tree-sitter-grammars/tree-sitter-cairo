@@ -391,7 +391,17 @@
   {
     "type": "atom_hint",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "hint",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "atom_reg",
@@ -741,6 +751,10 @@
           "named": true
         },
         {
+          "type": "code_element_hint",
+          "named": true
+        },
+        {
           "type": "code_element_if",
           "named": true
         },
@@ -938,6 +952,21 @@
       "types": [
         {
           "type": "func",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "code_element_hint",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "hint",
           "named": true
         }
       ]
@@ -1944,6 +1973,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "hint",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "identifier",
@@ -3081,6 +3115,14 @@
   },
   {
     "type": "%lang",
+    "named": false
+  },
+  {
+    "type": "%{",
+    "named": false
+  },
+  {
+    "type": "%}",
     "named": false
   },
   {
