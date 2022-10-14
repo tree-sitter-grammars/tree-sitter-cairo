@@ -10,10 +10,9 @@ module.exports = grammar({
     cairo_file: $ => $.code_block,
 
     code_block: $ => repeat1($._code_element),
-
+    
     _code_element: $ => choice(
-      'alloc_locals',
-      $.code_element_member,
+      seq('alloc_locals', ";"),
       $.code_element_const,
       $.code_element_reference,
       $.code_element_local_var,
@@ -21,11 +20,11 @@ module.exports = grammar({
       $.code_element_compound_assert_eq,
       $.code_element_static_assert,
       $.code_element_return,
-      // TODO: split return into normal + function return
       $.code_element_if,
-      $.function_call,
+      seq($.function_call, ";"),
       $.code_element_function,
       $.code_element_struct,
+      $.code_element_namespace,
       $.code_element_typedef,
       $.code_element_with_attr_statement,
       $.code_element_with_statement,
@@ -64,7 +63,7 @@ module.exports = grammar({
     code_element_instruction: $ => choice(
       $._instruction_body,
       seq(
-        $._instruction_body, ';', 'ap', '++',
+        $._instruction_body, ',', 'ap', '++',
       ),
     ),
 
@@ -157,13 +156,13 @@ module.exports = grammar({
     ),
 
     code_element_if: $ => seq(
-      "if", $.bool_expr, ":", $.code_block,
-      optional(seq("else", ":", $.code_block)),
-      "end"
+      "if", "(", $.bool_expr, ")", "{", $.code_block, "}",
+      optional(seq("}", "else", "{", $.code_block)),
+      "}"
     ),
 
     code_element_return: $ => seq(
-      'return', choice($.arg_list, $.function_call)
+      'return', $._expr, ";"
     ),
 
     arg_list: $ => seq('(', sep(',', $.arg_list_item), ')'),
@@ -298,7 +297,7 @@ module.exports = grammar({
       optional($.decorator_list),
       $._funcdecl,
       optional($.code_block),
-      "end"
+      "}"
     ),
 
     decorator_list: $ => seq(
@@ -316,7 +315,7 @@ module.exports = grammar({
       optional($.implicit_arguments),
       $.arguments,
       optional($.returns),
-      ":"
+      "{"
     ),
 
     returns: $ => seq(
@@ -330,38 +329,45 @@ module.exports = grammar({
     ),
 
     code_element_reference: $ => seq(
-      "let", $._ref_binding, "=", $.rvalue,
+      "let", $._ref_binding, "=", $.rvalue, ";"
     ),
 
     code_element_local_var: $ => seq(
-      "local", $.typed_identifier, optional(seq("=", $._expr)),
+      "local", $.typed_identifier, optional(seq("=", $._expr)), ";"
     ),
 
     code_element_temp_var: $ => seq(
-      "tempvar", $.typed_identifier, optional(seq("=", $._expr)),
+      "tempvar", $.typed_identifier, optional(seq("=", $._expr)), ";"
     ),
 
     code_element_compound_assert_eq: $ => seq(
-      "assert", $._expr, "=", $._expr,
+      "assert", $._expr, "=", $._expr, ";"
     ),
 
     code_element_static_assert: $ => seq(
-      "static_assert", $._expr, "==", $._expr,
+      "static_assert", $._expr, "==", $._expr, ";"
     ),
 
     code_element_const: $ => seq(
-      "const", $.identifier, "=", $._expr
+      "const", $.identifier, "=", $._expr, ";"
     ),
 
     code_element_struct: $ => seq(
       optional($.decorator_list),
-      choice("struct", "namespace"), $.identifier_def, ":",
+      "struct", $.identifier_def, "{",
+      optional(sep(",", $.typed_identifier)),
+      "}"
+    ),
+
+    code_element_namespace: $ => seq(
+      optional($.decorator_list),
+      "namespace", $.identifier_def, "{",
       optional($.code_block),
-      "end"
+      "}"
     ),
 
     code_element_typedef: $ => seq(
-      "using", $.identifier_def, "=", $.type,
+      "using", $.identifier_def, "=", $.type, ";"
     ),
 
     _attr_val: $ => seq(
@@ -369,19 +375,15 @@ module.exports = grammar({
     ),
 
     code_element_with_attr_statement: $ => seq(
-      "with_attr", $.identifier_def, optional($._attr_val), ":",
+      "with_attr", $.identifier_def, optional($._attr_val), "{",
       $.code_block,
-      "end"
+      "}"
     ),
 
     code_element_with_statement: $ => seq(
-      "with", sep1(",", $.aliased_identifier), ":",
+      "with", sep1(",", $.aliased_identifier), "{",
       $.code_block,
-      "end"
-    ),
-
-    code_element_member: $ => seq(
-      "member", $.typed_identifier,
+      "}"
     ),
 
     code_element_function: $ => $.func,
@@ -411,7 +413,7 @@ module.exports = grammar({
 
     number: $ => /\d+/,
 
-    comment: $ => token(seq('#', /.*/)),
+    comment: $ => token(seq('//', /.*/)),
   }
 });
 

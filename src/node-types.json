@@ -240,7 +240,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "atom_cast",
@@ -771,7 +771,7 @@
           "named": true
         },
         {
-          "type": "code_element_member",
+          "type": "code_element_namespace",
           "named": true
         },
         {
@@ -1229,15 +1229,23 @@
     }
   },
   {
-    "type": "code_element_member",
+    "type": "code_element_namespace",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
-          "type": "typed_identifier",
+          "type": "code_block",
+          "named": true
+        },
+        {
+          "type": "decorator_list",
+          "named": true
+        },
+        {
+          "type": "identifier_def",
           "named": true
         }
       ]
@@ -1268,14 +1276,86 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
-          "type": "arg_list",
+          "type": "atom_cast",
+          "named": true
+        },
+        {
+          "type": "atom_deref",
+          "named": true
+        },
+        {
+          "type": "atom_dot",
+          "named": true
+        },
+        {
+          "type": "atom_hex_number",
+          "named": true
+        },
+        {
+          "type": "atom_hint",
+          "named": true
+        },
+        {
+          "type": "atom_reg",
+          "named": true
+        },
+        {
+          "type": "atom_short_string",
+          "named": true
+        },
+        {
+          "type": "atom_subscript",
+          "named": true
+        },
+        {
+          "type": "atom_tuple_or_parentheses",
+          "named": true
+        },
+        {
+          "type": "expr_add",
+          "named": true
+        },
+        {
+          "type": "expr_div",
+          "named": true
+        },
+        {
+          "type": "expr_mul",
+          "named": true
+        },
+        {
+          "type": "expr_pow",
+          "named": true
+        },
+        {
+          "type": "expr_sub",
           "named": true
         },
         {
           "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "unary_addressof",
+          "named": true
+        },
+        {
+          "type": "unary_neg",
+          "named": true
+        },
+        {
+          "type": "unary_new_operator",
           "named": true
         }
       ]
@@ -1381,15 +1461,15 @@
       "required": true,
       "types": [
         {
-          "type": "code_block",
-          "named": true
-        },
-        {
           "type": "decorator_list",
           "named": true
         },
         {
           "type": "identifier_def",
+          "named": true
+        },
+        {
+          "type": "typed_identifier",
           "named": true
         }
       ]
@@ -3334,10 +3414,6 @@
     "named": false
   },
   {
-    "type": "end",
-    "named": false
-  },
-  {
     "type": "felt",
     "named": false
   },
@@ -3375,10 +3451,6 @@
   },
   {
     "type": "local",
-    "named": false
-  },
-  {
-    "type": "member",
     "named": false
   },
   {
