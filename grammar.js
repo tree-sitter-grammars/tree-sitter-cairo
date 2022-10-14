@@ -156,7 +156,7 @@ module.exports = grammar({
     ),
 
     code_element_if: $ => seq(
-      "if", "(", $.bool_expr, ")", "{", $.code_block, "}",
+      "if", "(", $.bool_expr, ")", "{", $.code_block,
       optional(seq("}", "else", "{", $.code_block)),
       "}"
     ),

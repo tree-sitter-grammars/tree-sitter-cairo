@@ -848,10 +848,6 @@
           "name": "code_block"
         },
         {
-          "type": "STRING",
-          "value": "}"
-        },
-        {
           "type": "CHOICE",
           "members": [
             {
