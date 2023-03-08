@@ -1,69 +1,217 @@
-const IDENTIFIER = /[a-zA-Z_][a-zA-Z_0-9]*/;
+/**
+ * @file Cairo grammar for tree-sitter
+ * @author Amaan Qureshi <amaanq12@gmail.com>
+ * @author Blaž Hrastnik <blaz@mxxn.io>
+ * @author Scott Piriou
+ * @license MIT
+ */
+
+// deno-lint-ignore-file ban-ts-comment
+/* eslint-disable arrow-parens */
+/* eslint-disable camelcase */
+/* eslint-disable-next-line spaced-comment */
+/// <reference types="tree-sitter-cli/dsl" />
+// @ts-check
+
+'use strict';
+
+const PREC = {
+  PAREN: -1,
+  ASSIGN: 1,
+  LOGICAL_AND: 4,
+  EQUALITY: 7,
+  ADDITIVE: 8,
+  MULTIPLICATIVE: 9,
+  UNARY: 10,
+  POWER: 11,
+  CALL: 12,
+  MEMBER: 13,
+};
+
+// Based on https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/lang/compiler/cairo.ebnf
 module.exports = grammar({
   name: 'cairo',
- 
-  // Based on https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/lang/compiler/cairo.ebnf  
+
+  externals: $ => [
+    $.hint,
+  ],
 
   extras: $ => [/\s/, $.comment],
 
-  rules: {
-    cairo_file: $ => $.code_block,
+  inline: $ => [
+    $._instruction_body,
+  ],
 
-    code_block: $ => repeat1($._code_element),
-    
-    _code_element: $ => choice(
-      seq('alloc_locals', ";"),
-      $.code_element_const,
-      $.code_element_reference,
-      $.code_element_local_var,
-      $.code_element_temp_var,
-      $.code_element_compound_assert_eq,
-      $.code_element_static_assert,
-      $.code_element_return,
-      $.code_element_if,
-      seq($.function_call, ";"),
-      $.code_element_function,
-      $.code_element_struct,
-      $.code_element_namespace,
-      $.code_element_typedef,
-      $.code_element_with_attr_statement,
-      $.code_element_with_statement,
-      $.code_element_hint,
-      $.code_element_directive,
-      $.code_element_import,
-      $.code_element_instruction,
+  supertypes: $ => [
+    $.cairo_0_statement,
+    $._instruction_body,
+  ],
+
+  word: $ => $.identifier,
+
+  rules: {
+    program: $ => choice(
+      repeat($.cairo_0_statement),
+      // repeat($.cairo_1_statement),
     ),
 
-    implicit_arguments: $ => seq('{', sep(",", $.typed_identifier), '}'),
+    // ╭──────────────────╮
+    // │ Cairo 0.x Parser │
+    // ╰──────────────────╯
+    cairo_0_statement: $ => choice(
+      $.import_statement,
+      $.type_definition,
+      $.builtin_directive,
+      $.lang_directive,
+      $.decorated_definition,
+      $.namespace_definition,
+      $.struct_definition,
+      $.function_definition,
+      $.expression_statement,
+      $.alloc_locals,
+      $.assert_statement,
+      $.static_assert_statement,
+      $.let_binding,
+      $.const_var_declaration,
+      $.local_var_declaration,
+      $.temp_var_declaration,
+      $.instruction,
+      $.hint,
+      $.label,
+      $.attribute_statement,
+      $.if_statement,
+      $.with_statement,
+      $.return_statement,
+    ),
 
-    arguments: $ => seq('(', sep(",", $.typed_identifier), ')'),
-    
-    
-    named_type: $ => prec(1, choice(
-      seq(
-        $.identifier,
-        optional(seq(":", $.type)),
+    import_statement: $ => seq(
+      'from',
+      field('module_name', $.dotted_name),
+      'import',
+      choice(
+        $._import_list,
+        seq('(', $._import_list, ')'),
       ),
-      $.non_identifier_type,
+    ),
+
+    _import_list: $ => prec.right(seq(
+      commaSep1(field('name', choice(
+        $.dotted_name,
+        $.aliased_import,
+      ))),
+      optional(','),
     )),
 
-    non_identifier_type: $ => choice(
-      'felt',
-      'codeoffset',
-      seq( $.type, '*'),
-      seq( $.type, '**'),
-      seq("(", sep1(",", $.named_type), ")")
-    ),
-    
-    type: $ => choice(
-      $.non_identifier_type,
-      $.named_type,
+    aliased_import: $ => seq(
+      field('name', $.dotted_name),
+      'as',
+      field('alias', $.identifier),
     ),
 
-    code_element_instruction: $ => choice(
-      $._instruction_body,
+    type_definition: $ => seq(
+      'using', $.identifier, '=', $.type, ';',
+    ),
+
+    builtin_directive: $ => prec.right(seq(
+      '%builtins', repeat1($.identifier),
+    )),
+
+    lang_directive: $ => seq(
+      '%lang', $.identifier,
+    ),
+
+    decorated_definition: $ => seq(
+      repeat1($.decorator),
+      field('definition', choice(
+        $.namespace_definition,
+        $.struct_definition,
+        $.function_definition,
+      )),
+    ),
+
+    decorator: $ => seq(
+      '@',
+      $.identifier,
+    ),
+
+    namespace_definition: $ => seq(
+      'namespace', $.identifier, '{',
+      repeat($.cairo_0_statement),
+      '}',
+    ),
+
+    struct_definition: $ => seq(
+      'struct', $.identifier, '{',
+      optionalCommaSep($.typed_identifier),
+      '}',
+    ),
+
+    function_definition: $ => seq(
+      'func',
+      $.identifier,
+      optional($.implicit_arguments),
+      $.arguments,
+      optional(seq('->', alias(
+        choice($.type, $.arguments),
+        $.return_type,
+      ))),
+      '{',
+      repeat($.cairo_0_statement),
+      '}',
+    ),
+
+    implicit_arguments: $ => seq(
+      '{',
+      optionalCommaSep($.typed_identifier),
+      '}',
+    ),
+
+    arguments: $ => seq(
+      '(',
+      commaSep($.typed_identifier),
+      optional(','),
+      ')',
+    ),
+
+    expression_statement: $ => seq($.expression, ';'),
+
+    alloc_locals: _ => seq('alloc_locals', ';'),
+
+    assert_statement: $ => seq(
+      'assert', $.expression, '=', $.expression, ';',
+    ),
+
+    static_assert_statement: $ => seq(
+      'static_assert', $.expression, '==', $.expression, ';',
+    ),
+
+    let_binding: $ => seq(
+      'let',
+      field('left', $._ref_binding),
+      '=',
+      field('right', choice(
+        $.call_instruction,
+        $.expression,
+      )),
+      ';',
+    ),
+
+    const_var_declaration: $ => seq(
+      'const', $.identifier, '=', $.expression, ';',
+    ),
+
+    local_var_declaration: $ => seq(
+      'local', $.typed_identifier, optional(seq('=', $.expression)), ';',
+    ),
+
+    temp_var_declaration: $ => seq(
+      'tempvar', $.typed_identifier, optional(seq('=', $.expression)), ';',
+    ),
+
+    instruction: $ => choice(
+      seq($._instruction_body, ';'),
       seq(
-        $._instruction_body, ',', 'ap', '++',
+        $._instruction_body, ',', 'ap', '++', ';',
       ),
     ),
 
@@ -81,15 +229,15 @@ module.exports = grammar({
     ),
 
     inst_assert_eq: $ => seq(
-      $._expr, '=', $._expr
+      $.expression, '=', $.expression,
     ),
 
     inst_jmp_rel: $ => seq(
-      'jmp', 'rel', $._expr,
+      'jmp', 'rel', $.expression,
     ),
 
     inst_jmp_abs: $ => seq(
-      'jmp', 'abs', $._expr,
+      'jmp', 'abs', $.expression,
     ),
 
     inst_jmp_to_label: $ => seq(
@@ -97,330 +245,261 @@ module.exports = grammar({
     ),
 
     inst_jnz: $ => prec(1, seq(
-      'jmp', 'rel', $._expr, 'if', $._expr, '!=', $.number,
+      'jmp', 'rel', $.expression, 'if', $.expression, '!=', $.number,
     )),
 
     inst_jnz_to_label: $ => prec(1, seq(
-      'jmp', $.identifier, 'if', $._expr, '!=', $.number,
+      'jmp', $.identifier, 'if', $.expression, '!=', $.number,
     )),
 
-    inst_ret: $ => 'ret',
+    inst_ret: _ => 'ret',
 
     inst_add_ap: $ => seq(
-      'ap', '+=', $._expr,
+      'ap', '+=', $.expression,
     ),
 
     inst_data_word: $ => seq(
-      'dw', $._expr,
+      'dw', $.expression,
     ),
 
-    code_element_import: $ => seq(
-      'from', $.identifier, 'import', $.import_body,
-    ),
+    label: $ => seq($.identifier, ':', $.cairo_0_statement),
 
-    import_body: $ => seq(
-      choice(
-        seq("(", sep1(',', $.aliased_identifier), ")"), // optional set of parentheses
-        sep1(',', $.aliased_identifier),
-      )
-    ),
-
-    aliased_identifier: $ => seq(
-      $.identifier_def,
-      optional(seq(
-        'as',
-        $.identifier_def
-      ))
-    ),
-
-    hint: $ => seq("%{", field("body", repeat(/.+/)), "%}"),
-
-    code_element_hint: $ => $.hint,
-
-    code_element_directive: $ => choice(
-      $.builtin_directive,
-      $.lang_directive,
-    ),
-
-    builtin_directive: $ => prec.right(seq(
-      '%builtins', repeat1($.identifier)
-    )),
-
-    lang_directive: $ => seq(
-      '%lang', $.identifier
-    ),
-    
-    bool_expr: $ => choice(
-      seq($._expr, "==", $._expr),
-      seq($._expr, "!=", $._expr)
-    ),
-
-    code_element_if: $ => seq(
-      "if", "(", $.bool_expr, ")", "{", $.code_block,
-      optional(seq("}", "else", "{", $.code_block)),
-      "}"
-    ),
-
-    code_element_return: $ => seq(
-      'return', $._expr, ";"
-    ),
-
-    arg_list: $ => seq('(', sep(',', $.arg_list_item), ')'),
-
-    arg_list_item: $ => $._expr_assignment,
-
-    _expr: $ => prec.right(2, $._sum),
-
-    _sum: $ => prec(1, choice(
-      $._product,
-      $.expr_add,
-      $.expr_sub,
-    )),
-
-    _product: $ => prec(2, choice(
-      $._unary,
-      $.expr_mul,
-      $.expr_div,
-    )),
-
-    _unary: $ => prec(3, choice(
-      $._pow,
-      $.unary_addressof,
-      $.unary_neg,
-      $.unary_new_operator,
-    )),
-
-    _pow: $ => prec(4, choice(
-      $._atom,
-      $.expr_pow,
-    )),
-
-    _atom: $ => prec(5, choice(
+    attribute_statement: $ => seq(
+      'with_attr',
       $.identifier,
-      $._atom_number,
-      $.atom_hex_number,
-      $.atom_short_string,
-      $.atom_hint,
-      $.atom_reg,
-      $.function_call,
-      $.atom_deref,
-      $.atom_subscript,
-      $.atom_dot,
-      $.atom_cast,
-      $.atom_tuple_or_parentheses,
-    )),
-
-    _atom_number: $ => $.number,
-
-    atom_hex_number: $ => /0x[a-f|A-F|0-9]*/,
-
-    string: $ => /"(.*?)"/,
-
-    atom_short_string: $ => /'(.*?)'/,
-
-    atom_hint: $ => seq('nondet', $.hint),
-
-    atom_reg: $ => choice(
-      'ap',
-      'fp'
+      optional(seq('(', repeat($.string), ')')),
+      '{',
+      repeat($.cairo_0_statement),
+      '}',
     ),
 
-    atom_func_call: $ => $.function_call,
+    if_statement: $ => seq(
+      'if',
+      '(',
+      $.expression,
+      ')',
+      '{',
+      repeat($.cairo_0_statement),
+      optional(seq('}', 'else', '{', repeat($.cairo_0_statement))),
+      '}',
+    ),
 
-    atom_deref: $ => seq(
+    with_statement: $ => seq(
+      'with', commaSep1($.identifier), '{',
+      repeat($.cairo_0_statement),
+      '}',
+    ),
+
+    return_statement: $ => seq(
+      'return', $.expression, ';',
+    ),
+
+    non_identifier_type: $ => choice(
+      'felt',
+      'codeoffset',
+      seq( $.type, '*'),
+      seq( $.type, '**'),
+      seq('(', commaSep1($.named_type), ')'),
+      $.hint,
+    ),
+
+    type: $ => choice(
+      $.non_identifier_type,
+      $.named_type,
+    ),
+
+    named_type: $ => prec(1, choice(
+      seq(
+        $.identifier,
+        optional(seq(':', $.type)),
+      ),
+      $.non_identifier_type,
+    )),
+
+    expression: $ => choice(
+      $.unary_expression,
+      $.binary_expression,
+      $.assignment_expression,
+      $.subscript_expression,
+      $.member_expression,
+      $.cast_expression,
+      $.tuple_expression,
+      $.identifier,
+      $.number,
+      $.short_string,
+      $.hint_expression,
+      $.register,
+      $.call_expression,
+      $.deref_expression,
+      $.cast_expression,
+    ),
+
+    unary_expression: $ => prec.left(PREC.UNARY,
+      seq(
+        field('operator', choice('&', '-', 'new')),
+        field('operand', $.expression),
+      ),
+    ),
+
+    binary_expression: $ => {
+      const table = [
+        [prec.left, '+', PREC.ADDITIVE],
+        [prec.left, '-', PREC.ADDITIVE],
+        [prec.left, '*', PREC.MULTIPLICATIVE],
+        [prec.left, '/', PREC.MULTIPLICATIVE],
+        [prec.left, 'and', PREC.LOGICAL_AND],
+        [prec.right, '**', PREC.POWER],
+        [prec.left, '==', PREC.EQUALITY],
+        [prec.left, '!=', PREC.EQUALITY],
+      ];
+
+      // @ts-ignore
+      return choice(...table.map(([fn, operator, precedence]) => fn(precedence, seq(
+        field('left', $.expression),
+        // @ts-ignore
+        field('operator', operator),
+        field('right', $.expression),
+      ))));
+    },
+
+    assignment_expression: $ => prec.right(PREC.ASSIGN, seq(
+      field('left', $.expression),
+      field('operator', '='),
+      field('right', $.expression),
+    )),
+
+    string: _ => /"(.*?)"/,
+
+    short_string: _ => /'(.*?)'/,
+
+    hint_expression: $ => seq('nondet', $.hint),
+
+    register: _ => choice(
+      'ap',
+      'fp',
+    ),
+
+    deref_expression: $ => seq(
       '[',
-      $._expr,
+      $.expression,
       ']',
     ),
 
-    atom_subscript: $ => prec(5, seq(
-      $._atom, '[', $._expr, ']',
+    subscript_expression: $ => prec(PREC.MEMBER, seq(
+      $.expression, '[', $.expression, ']',
     )),
 
-    atom_dot: $ => seq(
-      $._atom, '.', $.identifier_def,
-    ),
-
-    atom_cast: $ => seq(
-      'cast', '(', $._expr, ',', $.type, ')'
-    ),
-
-    atom_tuple_or_parentheses: $ => $.arg_list,
-
-    expr_pow: $ => seq(
-      $._atom, '**', $._pow
-    ),
-
-    unary_addressof: $ => seq(
-      '&', $._unary,
-    ),
-
-    unary_neg: $ => seq(
-      '-', $._unary,
-    ),
-
-    unary_new_operator: $ => seq(
-      'new', $._unary,
-    ),
-
-    expr_mul: $ => prec(3, seq(
-      $._product, '*', $._unary
+    member_expression: $ => prec(PREC.MEMBER, seq(
+      $.expression, '.', $.identifier,
     )),
 
-    expr_div: $ => prec(3, seq(
-      $._product, '/', $._unary
-    )),
-
-    expr_add: $ =>  prec(2, seq(
-      $._sum, '+', $._product
-    )),
-
-    expr_sub: $ => prec(2, seq(
-      $._sum, '-', $._product,
-    )),
-
-
-    _expr_assignment: $ => choice(
-      $._expr,
-      seq($.identifier_def, '=', $._expr)
+    cast_expression: $ => seq(
+      'cast', '(', $.expression, ',', $.type, ')',
     ),
 
-    function_call: $ => prec(6, seq(
-      $.identifier,
+    tuple_expression: $ => prec(PREC.CALL, seq(
+      '(',
+      optionalCommaSep($.expression),
+      ')',
+    )),
+
+    call_expression: $ => prec(PREC.CALL, seq(
+      $.expression,
       optional(seq(
-        '{', sep(',', $.arg_list_item), '}'
+        '{',
+        commaSep($.assignment_expression),
+        optional(','),
+        '}',
       )),
-      $.arg_list
+      $.tuple_expression,
     )),
-
-    func: $ => seq(
-      optional($.decorator_list),
-      $._funcdecl,
-      optional($.code_block),
-      "}"
-    ),
-
-    decorator_list: $ => seq(
-      repeat1($.decorator)
-    ),
-
-    decorator: $ => seq(
-      '@',
-      $.identifier_def
-    ),
-
-    _funcdecl: $ => seq(
-      "func",
-      $.identifier_def,
-      optional($.implicit_arguments),
-      $.arguments,
-      optional($.returns),
-      "{"
-    ),
-
-    returns: $ => seq(
-      '->',
-      $.arguments
-    ),
 
     _ref_binding: $ => choice(
       $.typed_identifier,
-      seq( "(", sep(",", $.typed_identifier), ")")
-    ),
-
-    code_element_reference: $ => seq(
-      "let", $._ref_binding, "=", $.rvalue, ";"
-    ),
-
-    code_element_local_var: $ => seq(
-      "local", $.typed_identifier, optional(seq("=", $._expr)), ";"
-    ),
-
-    code_element_temp_var: $ => seq(
-      "tempvar", $.typed_identifier, optional(seq("=", $._expr)), ";"
-    ),
-
-    code_element_compound_assert_eq: $ => seq(
-      "assert", $._expr, "=", $._expr, ";"
-    ),
-
-    code_element_static_assert: $ => seq(
-      "static_assert", $._expr, "==", $._expr, ";"
-    ),
-
-    code_element_const: $ => seq(
-      "const", $.identifier, "=", $._expr, ";"
-    ),
-
-    code_element_struct: $ => seq(
-      optional($.decorator_list),
-      "struct", $.identifier_def, "{",
-      optional(sep(",", $.typed_identifier)),
-      "}"
-    ),
-
-    code_element_namespace: $ => seq(
-      optional($.decorator_list),
-      "namespace", $.identifier_def, "{",
-      optional($.code_block),
-      "}"
-    ),
-
-    code_element_typedef: $ => seq(
-      "using", $.identifier_def, "=", $.type, ";"
-    ),
-
-    _attr_val: $ => seq(
-      "(", optional($.string), ")"
-    ),
-
-    code_element_with_attr_statement: $ => seq(
-      "with_attr", $.identifier_def, optional($._attr_val), "{",
-      $.code_block,
-      "}"
-    ),
-
-    code_element_with_statement: $ => seq(
-      "with", sep1(",", $.aliased_identifier), "{",
-      $.code_block,
-      "}"
-    ),
-
-    code_element_function: $ => $.func,
-
-    rvalue: $ => choice(
-      $.call_instruction,
-      $._expr,
+      seq( '(', commaSep($.typed_identifier), ')'),
     ),
 
     call_instruction: $ => choice(
-      seq("call", "rel", $._expr),
-      seq("call", "abs", $._expr),
-      seq("call", $.identifier)
+      seq('call', 'rel', $.expression),
+      seq('call', 'abs', $.expression),
+      seq('call', $.identifier),
     ),
 
     typed_identifier: $ => seq(
-      optional("local"),
-      $.identifier_def,
-      optional(seq(":", $.type))
+      optional('local'),
+      $.identifier,
+      optional(seq(':', $.type)),
     ),
 
-    identifier_def: $ => IDENTIFIER,
+    dotted_name: $ => sep1($.identifier, '.'),
 
-    identifier: $ => prec.right(1, sep1(".", IDENTIFIER)),
+    identifier: _ => /[a-zA-Z_][a-zA-Z_0-9]*/,
 
-    word: $ => $.identifier,
+    number: _ => {
+      const hex_literal = /0x[a-f|A-F|0-9]+/;
 
-    number: $ => /\d+/,
+      const decimal_literal = /\d+/;
 
-    comment: $ => token(seq('//', /.*/)),
-  }
+      return token(choice(
+        hex_literal,
+        decimal_literal,
+      ));
+    },
+
+    comment: _ => token(seq('//', /.*/)),
+  },
 });
 
-function sep(separator, rule) {
-  return optional(sep1(separator, rule));
+module.exports.PREC = PREC;
+
+/**
+ * Creates a rule to optionally match one or more of the rules separated
+ * by a comma, optionally ending with a comma
+ *
+ * @param {Rule} rule
+ *
+ * @return {ChoiceRule}
+ *
+ */
+function optionalCommaSep(rule) {
+  return optional(seq(sep1(rule, ','), optional(',')));
 }
 
-function sep1(separator, rule) {
+
+/**
+ * Creates a rule to optionally match one or more of the rules separated
+ * by a comma
+ *
+ * @param {Rule} rule
+ *
+ * @return {ChoiceRule}
+ *
+ */
+function commaSep(rule) {
+  return optional(sep1(rule, ','));
+}
+
+/**
+ * Creates a rule to match one or more of the rules separated by a comma
+ *
+ * @param {Rule} rule
+ *
+ * @return {SeqRule}
+ *
+ */
+function commaSep1(rule) {
+  return sep1(rule, ',');
+}
+
+/**
+* Creates a rule to match one or more of the rules separated by the separator
+*
+* @param {Rule} rule
+* @param {string|Rule} separator - The separator to use.
+*
+* @return {SeqRule}
+*
+*/
+function sep1(rule, separator) {
   return seq(rule, repeat(seq(separator, rule)));
 }

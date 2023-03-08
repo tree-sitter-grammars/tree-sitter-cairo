@@ -1,0 +1,46 @@
+{
+  "name": "tree-sitter-cairo",
+  "version": "0.0.1",
+  "description": "Cairo grammar for tree-sitter",
+  "main": "bindings/node",
+  "keywords": [
+    "parsing",
+    "lexer",
+    "cairo"
+  ],
+  "author": "Scott Piriou",
+  "contributors": [
+    "Amaan Qureshi <amaanq12@gmail.com>",
+    "Blaž Hrastnik <blaz@mxxn.io>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amaanq/tree-sitter-cairo/issues"
+  },
+  "homepage": "https://github.com/amaanq/tree-sitter-cairo#readme",
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0",
+    "eslint-config-google": "^0.14.0",
+    "tree-sitter-cli": "^0.20.7"
+  },
+  "repository": "https://github.com/amaanq/tree-sitter-cairo",
+  "scripts": {
+    "build": "tree-sitter generate && node-gyp build",
+    "lint": "eslint grammar.js",
+    "parse": "tree-sitter parse",
+    "test": "tree-sitter test && script/parse-examples",
+    "test-windows": "tree-sitter test"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.cairo",
+      "injection-regex": "cairo",
+      "file-types": [
+        "cairo"
+      ]
+    }
+  ]
+}
