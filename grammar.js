@@ -33,7 +33,8 @@ module.exports = grammar({
   name: 'cairo',
 
   externals: $ => [
-    $.hint_content,
+    '%{',
+    $.code_line,
   ],
 
   extras: $ => [/\s/, $.comment],
@@ -376,9 +377,11 @@ module.exports = grammar({
 
     hint: $ => seq(
       '%{',
-      $.hint_content,
+      optional($.python_code),
       '%}',
     ),
+
+    python_code: $ => repeat1($.code_line),
 
     register: _ => choice(
       'ap',
