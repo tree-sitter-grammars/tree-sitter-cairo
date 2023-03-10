@@ -33,7 +33,7 @@ module.exports = grammar({
   name: 'cairo',
 
   externals: $ => [
-    $.hint,
+    $.hint_content,
   ],
 
   extras: $ => [/\s/, $.comment],
@@ -373,6 +373,12 @@ module.exports = grammar({
     short_string: _ => /'(.*?)'/,
 
     hint_expression: $ => seq('nondet', $.hint),
+
+    hint: $ => seq(
+      '%{',
+      $.hint_content,
+      '%}',
+    ),
 
     register: _ => choice(
       'ap',
