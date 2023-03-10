@@ -297,8 +297,8 @@ module.exports = grammar({
     non_identifier_type: $ => choice(
       'felt',
       'codeoffset',
-      seq( $.type, '*'),
-      seq( $.type, '**'),
+      seq($.type, '*'),
+      seq($.type, '**'),
       seq('(', commaSep1($.named_type), ')'),
       $.hint,
     ),
@@ -416,7 +416,7 @@ module.exports = grammar({
 
     _ref_binding: $ => choice(
       $.typed_identifier,
-      seq( '(', commaSep($.typed_identifier), ')'),
+      seq('(', commaSep($.typed_identifier), ')'),
     ),
 
     call_instruction: $ => choice(
