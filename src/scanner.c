@@ -8,18 +8,21 @@
 enum Sym {
   HINT_START,
   PYTHON_CODE_LINE,
-  HINT_END,
 };
 
 enum Context {
-  NONE,
-  PYTHON_CODE,
-  // PYTHON_1_SQ_STRING,
-  // PYTHON_3_SQ_STRING,
-  // PYTHON_1_DQ_STRING,
-  // PYTHON_3_DQ_STRING,
+  C_NONE,
+  C_PYTHON_CODE,
+  C_PYTHON_STRING,
 };
 
+enum PythonStringType {
+  PST_NONE,
+  PST_1_SQ_STRING,
+  PST_3_SQ_STRING,
+  PST_1_DQ_STRING,
+  PST_3_DQ_STRING,
+};
 
 #ifdef TREE_SITTER_INTERNAL_BUILD
 #define DEBUG
@@ -33,6 +36,7 @@ enum Context {
 typedef struct {
   uint32_t ws_count;
   uint8_t context;
+  uint8_t pst;
 #ifdef DEBUG
   bool debug;
 #endif
@@ -63,6 +67,9 @@ typedef struct {
 #define SET_CONTEXT(c) state->context = c
 #endif
 
+#define SET_PST(p) state->pst = p
+#define IS_PST(p) state->pst == p
+
 bool scan(State *state, TSLexer *lexer, const bool *symbols) {
   // In Cairo, hints start with %{ and end with %} and can contain anything
   // including %s in between and start / end tokens inside of Python strings
@@ -71,7 +78,7 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
     if (PEEK == '%') {
       S_SKIP;
       if (PEEK == '{') {
-        SET_CONTEXT(PYTHON_CODE);
+        SET_CONTEXT(C_PYTHON_CODE);
         // Fallback to a built-in lexer
         return false;
       }
@@ -88,9 +95,10 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
     // There is a standalone hint close on line, don't consume it,
     // it's a job of a built-in lexer
     if (PEEK == '%') {
+      S_MARK_END;
       S_ADVANCE;
       if (PEEK == '}') {
-        SET_CONTEXT(NONE);
+        SET_CONTEXT(C_NONE);
         return false;
       }
     }
@@ -122,11 +130,55 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
     uint32_t content_len = 0;
     do {
       switch (PEEK) {
+      case '\'':
+      case '"':
+        const char ch = PEEK;
+        S_ADVANCE;
+        content_len++;
+        if (IN_CONTEXT(C_PYTHON_STRING)) {
+          unsigned iter =
+              IS_PST(PST_1_DQ_STRING) || IS_PST(PST_1_SQ_STRING) ? 0 : 2;
+          if (iter > 0)
+            while (--iter) {
+              S_ADVANCE;
+              content_len++;
+              if (PEEK != ch) {
+                SET_CONTEXT(C_PYTHON_CODE);
+                SET_PST(PST_NONE);
+                return false;
+              }
+            }
+          SET_CONTEXT(C_PYTHON_STRING);
+          continue;
+        } else {
+          if (PEEK == ch) {
+            S_ADVANCE;
+            content_len++;
+            if (PEEK == ch) {
+              S_ADVANCE;
+              content_len++;
+              SET_CONTEXT(C_PYTHON_STRING);
+              SET_PST(ch == '"' ? PST_3_DQ_STRING : PST_3_SQ_STRING);
+            } else
+              return false;
+          } else {
+            SET_CONTEXT(C_PYTHON_STRING);
+            SET_PST(ch == '"' ? PST_1_DQ_STRING : PST_1_SQ_STRING);
+          }
+        }
+        continue;
+
       case '%':
+        if (IN_CONTEXT(C_PYTHON_STRING)) {
+          S_ADVANCE;
+          content_len++;
+          continue;
+        }
+
         S_MARK_END;
         S_ADVANCE;
         if (PEEK == '}') {
-          SET_CONTEXT(NONE);
+          SET_CONTEXT(C_NONE);
           // Don't produce an empty node before a hint close token
           if (content_len > 0) {
             S_RESULT(PYTHON_CODE_LINE);
@@ -153,7 +205,8 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
 
 void *tree_sitter_cairo_external_scanner_create() {
   State *state = malloc(sizeof(State));
-  state->context = NONE;
+  state->context = C_NONE;
+  state->pst = PST_NONE;
   state->ws_count = 0;
 #ifdef DEBUG
   char *debug = getenv("TREE_SITTER_DEBUG");
