@@ -35,6 +35,7 @@ module.exports = grammar({
   externals: $ => [
     '%{',
     $.code_line,
+    $._failure,
   ],
 
   extras: $ => [/\s/, $.comment],

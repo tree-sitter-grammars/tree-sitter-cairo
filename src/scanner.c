@@ -8,6 +8,7 @@
 enum Sym {
   HINT_START,
   PYTHON_CODE_LINE,
+  FAILURE,
 };
 
 enum Context {
@@ -71,6 +72,11 @@ typedef struct {
 #define IS_PST(p) state->pst == p
 
 bool scan(State *state, TSLexer *lexer, const bool *symbols) {
+  if (SYM(FAILURE)) {
+    LOG("context: %d, pst: %d, ws indent: %d");
+    return false;
+  }
+
   // In Cairo, hints start with %{ and end with %} and can contain anything
   // including %s in between and start / end tokens inside of Python strings
 
@@ -98,6 +104,11 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
       S_MARK_END;
       S_ADVANCE;
       if (PEEK == '}') {
+        if (IN_CONTEXT(C_PYTHON_STRING)) {
+          S_RESULT(FAILURE);
+          return true;
+        }
+
         SET_CONTEXT(C_NONE);
         return false;
       }
@@ -139,16 +150,17 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
           unsigned iter =
               IS_PST(PST_1_DQ_STRING) || IS_PST(PST_1_SQ_STRING) ? 0 : 2;
           if (iter > 0)
-            while (--iter) {
-              S_ADVANCE;
-              content_len++;
+            do {
               if (PEEK != ch) {
                 SET_CONTEXT(C_PYTHON_CODE);
                 SET_PST(PST_NONE);
                 return false;
               }
-            }
-          SET_CONTEXT(C_PYTHON_STRING);
+              S_ADVANCE;
+              content_len++;
+            } while (--iter);
+          SET_CONTEXT(C_PYTHON_CODE);
+          SET_PST(PST_NONE);
           continue;
         } else {
           if (PEEK == ch) {
@@ -178,6 +190,11 @@ bool scan(State *state, TSLexer *lexer, const bool *symbols) {
         S_MARK_END;
         S_ADVANCE;
         if (PEEK == '}') {
+          if (IN_CONTEXT(C_PYTHON_STRING)) {
+            S_RESULT(FAILURE);
+            return true;
+          }
+
           SET_CONTEXT(C_NONE);
           // Don't produce an empty node before a hint close token
           if (content_len > 0) {
