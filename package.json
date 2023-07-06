@@ -8,9 +8,9 @@
     "lexer",
     "cairo"
   ],
-  "author": "Scott Piriou",
+  "author": "Amaan Qureshi <amaanq12@gmail.com>",
   "contributors": [
-    "Amaan Qureshi <amaanq12@gmail.com>",
+    "Scott Piriou",
     "Blaž Hrastnik <blaz@mxxn.io>"
   ],
   "license": "MIT",
@@ -40,6 +40,9 @@
       "injection-regex": "cairo",
       "file-types": [
         "cairo"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
       ]
     }
   ]
