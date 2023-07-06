@@ -1,263 +1,239 @@
+#include "tree_sitter/parser.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tree_sitter/parser.h>
 #include <wctype.h>
 
-enum Sym {
-  HINT_START,
-  PYTHON_CODE_LINE,
-  FAILURE,
+enum TokenType {
+    HINT_START,
+    PYTHON_CODE_LINE,
+    FAILURE,
 };
 
 enum Context {
-  C_NONE,
-  C_PYTHON_CODE,
-  C_PYTHON_STRING,
+    C_NONE,
+    C_PYTHON_CODE,
+    C_PYTHON_STRING,
+    C_PYTHON_COMMENT,
 };
 
 enum PythonStringType {
-  PST_NONE,
-  PST_1_SQ_STRING,
-  PST_3_SQ_STRING,
-  PST_1_DQ_STRING,
-  PST_3_DQ_STRING,
+    PST_NONE,
+    PST_1_SQ_STRING,
+    PST_3_SQ_STRING,
+    PST_1_DQ_STRING,
+    PST_3_DQ_STRING,
 };
 
-#ifdef TREE_SITTER_INTERNAL_BUILD
-#define DEBUG
-#define LOG(...)                                                               \
-  (((State *)state)->debug) ? fprintf(stderr, __VA_ARGS__),                    \
-      fputs("\n", stderr)   : 0
-#else
-#define LOG(...)
-#endif
-
 typedef struct {
-  uint32_t ws_count;
-  uint8_t context;
-  uint8_t pst;
-#ifdef DEBUG
-  bool debug;
-#endif
-} State;
+    uint32_t ws_count;
+    uint8_t context;
+    uint8_t pst;
+} Scanner;
 
-#define PEEK lexer->lookahead
-// Move the parser position one character to the right and consume a character.
-// Or if S_MARK_END was called then it allows to do lookahead more then one
-// character but without comsumption and including them into a resulting symbol.
-#define S_ADVANCE lexer->advance(lexer, false)
-// Move the parser position one character to the right, treating the consumed
-// character as skipped. Skipping allow to ignore whitespaces before a token
-// beginning or if some characters were marked as consumed by above operation
-// then skip them all.
-#define S_SKIP lexer->advance(lexer, true)
-#define S_RESULT(s) lexer->result_symbol = s
-#define S_EOF lexer->eof(lexer)
-
-#ifdef DEBUG
-#define SYM(s) LOG("symbol: " #s), (symbols[s])
-#define S_MARK_END LOG("  mark_end"), lexer->mark_end(lexer)
-#define IN_CONTEXT(c) LOG("in_context: " #c), state->context == c
-#define SET_CONTEXT(c) LOG("set_context: " #c), state->context = c
-#else
-#define SYM(s) (symbols[s])
-#define S_MARK_END lexer->mark_end(lexer)
-#define IN_CONTEXT(c) state->context == c
-#define SET_CONTEXT(c) state->context = c
-#endif
-
-#define SET_PST(p) state->pst = p
-#define IS_PST(p) state->pst == p
-
-bool scan(State *state, TSLexer *lexer, const bool *symbols) {
-  if (SYM(FAILURE)) {
-    LOG("context: %d, pst: %d, ws indent: %d");
-    return false;
-  }
-
-  // In Cairo, hints start with %{ and end with %} and can contain anything
-  // including %s in between and start / end tokens inside of Python strings
-
-  if (SYM(HINT_START)) {
-    if (PEEK == '%') {
-      S_SKIP;
-      if (PEEK == '{') {
-        SET_CONTEXT(C_PYTHON_CODE);
-        // Fallback to a built-in lexer
+bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+    if (valid_symbols[FAILURE]) {
         return false;
-      }
-    }
-  }
-
-  if (SYM(PYTHON_CODE_LINE)) {
-    // Skip the first \n after `%{` token,
-    // all trailing \n after code lines will be included to themselves
-    if (PEEK == '\n') {
-      S_SKIP;
     }
 
-    // There is a standalone hint close on line, don't consume it,
-    // it's a job of a built-in lexer
-    if (PEEK == '%') {
-      S_MARK_END;
-      S_ADVANCE;
-      if (PEEK == '}') {
-        if (IN_CONTEXT(C_PYTHON_STRING)) {
-          S_RESULT(FAILURE);
-          return true;
-        }
-
-        SET_CONTEXT(C_NONE);
-        return false;
-      }
-    }
-
-    // Skip whitespaces before the hint content
-    // and count them to be able to restore the position
-    // after every line
-    uint32_t ws_count = 0;
-    do {
-      if (PEEK == '\n') {
-        S_ADVANCE;
-        S_RESULT(PYTHON_CODE_LINE);
-        return true;
-      } else if (iswspace(PEEK)) {
-        ws_count++;
-        S_SKIP;
-        if (state->ws_count > 0 && ws_count == state->ws_count)
-          break;
-      } else {
-        // Make parsing redundant to improperly formated python code.
-        if (state->ws_count == 0 || ws_count < state->ws_count)
-          state->ws_count = ws_count;
-        break;
-      }
-    } while (!S_EOF);
-
-    LOG("ws indent: %d", state->ws_count);
-
-    uint32_t content_len = 0;
-    do {
-      switch (PEEK) {
-      case '\'':
-      case '"':
-        const char ch = PEEK;
-        S_ADVANCE;
-        content_len++;
-        if (IN_CONTEXT(C_PYTHON_STRING)) {
-          unsigned iter =
-              IS_PST(PST_1_DQ_STRING) || IS_PST(PST_1_SQ_STRING) ? 0 : 2;
-          if (iter > 0)
-            do {
-              if (PEEK != ch) {
-                SET_CONTEXT(C_PYTHON_CODE);
-                SET_PST(PST_NONE);
+    // In Cairo, hints start with %{ and end with %} and can contain anything
+    // including %s in between and start / end tokens inside of Python strings
+    if (valid_symbols[HINT_START]) {
+        if (lexer->lookahead == '%') {
+            lexer->advance(lexer, true);
+            if (lexer->lookahead == '{') {
+                scanner->context = C_PYTHON_CODE;
+                // Fallback to a built-in lexer
                 return false;
-              }
-              S_ADVANCE;
-              content_len++;
-            } while (--iter);
-          SET_CONTEXT(C_PYTHON_CODE);
-          SET_PST(PST_NONE);
-          continue;
-        } else {
-          if (PEEK == ch) {
-            S_ADVANCE;
-            content_len++;
-            if (PEEK == ch) {
-              S_ADVANCE;
-              content_len++;
-              SET_CONTEXT(C_PYTHON_STRING);
-              SET_PST(ch == '"' ? PST_3_DQ_STRING : PST_3_SQ_STRING);
-            } else
-              return false;
-          } else {
-            SET_CONTEXT(C_PYTHON_STRING);
-            SET_PST(ch == '"' ? PST_1_DQ_STRING : PST_1_SQ_STRING);
-          }
+            }
         }
-        continue;
+    }
 
-      case '%':
-        if (IN_CONTEXT(C_PYTHON_STRING)) {
-          S_ADVANCE;
-          content_len++;
-          continue;
+    if ((valid_symbols[PYTHON_CODE_LINE])) {
+        // Skip the first \n after `%{` token,
+        // all trailing \n after code lines will be included to themselves
+        if (lexer->lookahead == '\n') {
+            lexer->advance(lexer, true);
         }
 
-        S_MARK_END;
-        S_ADVANCE;
-        if (PEEK == '}') {
-          if (IN_CONTEXT(C_PYTHON_STRING)) {
-            S_RESULT(FAILURE);
-            return true;
-          }
+        // There is a standalone hint close on line, don't consume it,
+        // it's a job of a built-in lexer
+        if (lexer->lookahead == '%') {
+            lexer->mark_end(lexer);
+            lexer->advance(lexer, false);
+            if (lexer->lookahead == '}') {
+                if (scanner->context == C_PYTHON_STRING) {
+                    lexer->result_symbol = FAILURE;
+                    return true;
+                }
 
-          SET_CONTEXT(C_NONE);
-          // Don't produce an empty node before a hint close token
-          if (content_len > 0) {
-            S_RESULT(PYTHON_CODE_LINE);
-            return true;
-          }
-          return false;
+                scanner->context = C_NONE;
+                return false;
+            }
         }
 
-      case '\n':
-        S_ADVANCE;
-        S_MARK_END;
-        S_RESULT(PYTHON_CODE_LINE);
-        return true;
+        // Skip whitespaces before the hint content
+        // and count them to be able to restore the position
+        // after every line
+        uint32_t ws_count = 0;
+        while (!lexer->eof(lexer)) {
+            if (lexer->lookahead == '\n') {
+                lexer->advance(lexer, false);
+                lexer->mark_end(lexer);
+                lexer->result_symbol = PYTHON_CODE_LINE;
+                return true;
+            }
+            if (iswspace(lexer->lookahead)) {
+                ws_count += lexer->lookahead == '\t' ? 8 : 1;
+                lexer->advance(lexer, true);
+                if (scanner->ws_count > 0 && ws_count == scanner->ws_count) {
+                    break;
+                }
+            } else {
+                // Make parsing redundant to improperly formated python code.
+                if (scanner->ws_count == 0 || ws_count < scanner->ws_count) {
+                    scanner->ws_count = ws_count;
+                }
+                break;
+            }
+        }
 
-      default:
-        S_ADVANCE;
-        content_len++;
-      }
-    } while (!S_EOF);
-  }
+        uint32_t content_len = 0;
+        while (!lexer->eof(lexer)) {
+            switch (lexer->lookahead) {
+                case '\'':
+                case '"': {
+                    const char chr = (char)lexer->lookahead;
+                    lexer->advance(lexer, false);
+                    content_len++;
+                    if (scanner->context == C_PYTHON_STRING) {
+                        unsigned iter = scanner->pst == PST_1_DQ_STRING ||
+                                                scanner->pst == PST_1_SQ_STRING
+                                            ? 0
+                                            : 2;
+                        if (iter > 0) {
+                            do {
+                                if (lexer->lookahead != chr) {
+                                    scanner->context = C_PYTHON_CODE;
+                                    scanner->pst = PST_NONE;
+                                    return false;
+                                }
+                                lexer->advance(lexer, false);
+                                content_len++;
+                            } while (--iter);
+                        }
+                        scanner->context = C_PYTHON_CODE;
+                        scanner->pst = PST_NONE;
+                        continue;
+                    }
+                    if (lexer->lookahead == chr) {
+                        lexer->advance(lexer, false);
+                        content_len++;
+                        if (lexer->lookahead == chr) {
+                            lexer->advance(lexer, false);
+                            content_len++;
+                            scanner->context = C_PYTHON_STRING;
+                            scanner->pst =
+                                chr == '"' ? PST_3_DQ_STRING : PST_3_SQ_STRING;
+                        } else {
+                            // single/double string ended, '' or ""
+                            scanner->context = C_PYTHON_CODE;
+                            scanner->pst = PST_NONE;
+                        }
+                    } else {
+                        scanner->context = C_PYTHON_STRING;
+                        scanner->pst =
+                            chr == '"' ? PST_1_DQ_STRING : PST_1_SQ_STRING;
+                    }
 
-  return false;
+                    continue;
+                }
+                case '%':
+                    if (scanner->context == C_PYTHON_STRING) {
+                        lexer->advance(lexer, false);
+                        content_len++;
+                        continue;
+                    }
+
+                    lexer->mark_end(lexer);
+                    lexer->advance(lexer, false);
+                    if (lexer->lookahead == '}') {
+                        if (scanner->context == C_PYTHON_STRING) {
+                            lexer->result_symbol = FAILURE;
+                            return true;
+                        }
+
+                        scanner->context = C_NONE;
+                        // Don't produce an empty node before a hint close token
+                        if (content_len > 0) {
+                            lexer->result_symbol = PYTHON_CODE_LINE;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                case '\n':
+                    lexer->advance(lexer, false);
+                    lexer->mark_end(lexer);
+                    lexer->result_symbol = PYTHON_CODE_LINE;
+                    return true;
+
+                case '#':
+                    if (scanner->context == C_PYTHON_STRING) {
+                        lexer->advance(lexer, false);
+                        content_len++;
+                        continue;
+                    } else {
+                        scanner->context = C_PYTHON_COMMENT;
+                        while (lexer->lookahead != '\n' && !lexer->eof(lexer)) {
+                            lexer->advance(lexer, false);
+                            content_len++;
+                        }
+                        scanner->context = C_NONE;
+                        continue;
+                    }
+
+                default:
+                    lexer->advance(lexer, false);
+                    content_len++;
+            }
+        }
+    }
+
+    return false;
 }
 
 void *tree_sitter_cairo_external_scanner_create() {
-  State *state = malloc(sizeof(State));
-  state->context = C_NONE;
-  state->pst = PST_NONE;
-  state->ws_count = 0;
-#ifdef DEBUG
-  char *debug = getenv("TREE_SITTER_DEBUG");
-  state->debug = debug ? strlen(debug) > 0 : false;
-#endif
-  LOG("create");
-  return state;
+    Scanner *scanner = (Scanner *)calloc(1, sizeof(Scanner));
+    assert(scanner != NULL && "Failed to allocate memory for scanner");
+    return scanner;
 }
 
-bool tree_sitter_cairo_external_scanner_scan(void *state, TSLexer *lexer,
+bool tree_sitter_cairo_external_scanner_scan(void *payload, TSLexer *lexer,
                                              const bool *valid_symbols) {
-  LOG("scan");
-  return scan((State *)state, lexer, valid_symbols);
+    Scanner *scanner = (Scanner *)payload;
+    return scan(payload, lexer, valid_symbols);
 }
 
-unsigned tree_sitter_cairo_external_scanner_serialize(void *state,
+unsigned tree_sitter_cairo_external_scanner_serialize(void *payload,
                                                       char *buffer) {
-  LOG("serialize");
-  unsigned len = sizeof(State);
-  memcpy(buffer, state, len);
-  return len;
+    unsigned len = sizeof(Scanner);
+    memcpy(buffer, payload, len);
+    return len;
 }
 
-void tree_sitter_cairo_external_scanner_deserialize(void *state,
+void tree_sitter_cairo_external_scanner_deserialize(void *payload,
                                                     const char *buffer,
                                                     unsigned length) {
-  LOG("deserialize");
-  if (length > 0) {
-    assert(sizeof(State) == length);
-    memcpy(state, buffer, sizeof(State));
-  }
+    Scanner *scanner = (Scanner *)payload;
+    if (length > 0) {
+        assert(sizeof(Scanner) == length && "sizeof(Scanner) != length");
+        memcpy(scanner, buffer, sizeof(Scanner));
+    }
 }
 
-void tree_sitter_cairo_external_scanner_destroy(void *state) {
-  LOG("destroy");
-  free(state);
+void tree_sitter_cairo_external_scanner_destroy(void *payload) {
+    Scanner *scanner = (Scanner *)payload;
+    free(scanner);
 }
