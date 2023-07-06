@@ -172,6 +172,7 @@ bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
                         }
                         return false;
                     }
+                    break;
 
                 case '\n':
                     lexer->advance(lexer, false);
@@ -213,7 +214,7 @@ void *tree_sitter_cairo_external_scanner_create() {
 bool tree_sitter_cairo_external_scanner_scan(void *payload, TSLexer *lexer,
                                              const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
-    return scan(payload, lexer, valid_symbols);
+    return scan(scanner, lexer, valid_symbols);
 }
 
 unsigned tree_sitter_cairo_external_scanner_serialize(void *payload,
