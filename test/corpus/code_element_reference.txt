@@ -2,44 +2,43 @@
 Simple let statement number
 ===
 
-let a = 3
+let a = 3;
 
 ---
-(cairo_file
-    (code_block
-        (code_element_reference
-            (typed_identifier
-                (identifier))
-            (rvalue
-                (number)))))
+
+(program
+  (cairo_0_file
+    (let_binding
+      (typed_identifier
+        (identifier))
+      (number))))
 
 ===
 Simple let statement identifier
 ===
 
-let a = b
+let a = b;
 
 ---
-(cairo_file
-    (code_block
-        (code_element_reference
-            (typed_identifier
-                (identifier))
-            (rvalue
-                (identifier)))))
+
+(program
+  (cairo_0_file
+    (let_binding
+      (typed_identifier
+        (identifier))
+      (identifier))))
 
 ===
 Simple let local
 ===
 
-let local a = b
+let local a = b;
 
 ---
-(cairo_file
-    (code_block
-        (code_element_reference
-            (typed_identifier
-                (identifier))
-            (rvalue
-                (identifier)))))
-              
+
+(program
+  (cairo_0_file
+    (let_binding
+      (typed_identifier
+        (identifier))
+      (identifier))))

@@ -7,15 +7,15 @@ func no_arg():
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (arguments)
-                (code_block
-                    (code_element_return))))))
-                   
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (arguments)
+      (return_statement
+        (tuple_expression)))))
+
 ===
 Function declaration with 1 arg
 ===
@@ -25,16 +25,18 @@ func one_arg( a : felt ):
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (arguments
-                    (identifier)
-                    (type))
-                (code_block
-                    (code_element_return))))))
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (arguments
+        (typed_identifier
+          (identifier)
+          (type
+            (builtin_type))))
+      (return_statement
+        (tuple_expression)))))
 
 ===
 Function declaration with 3 arg
@@ -45,17 +47,23 @@ func three_args( a: felt, b: felt, c: felt ):
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (arguments
-                    (identifier)
-                    (type)
-                    (identifier)
-                    (type)
-                    (identifier)
-                    (type))
-                (code_block
-                    (code_element_return))))))
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (arguments
+        (typed_identifier
+          (identifier)
+          (type
+            (builtin_type)))
+        (typed_identifier
+          (identifier)
+          (type
+            (builtin_type)))
+        (typed_identifier
+          (identifier)
+          (type
+            (builtin_type))))
+      (return_statement
+        (tuple_expression)))))

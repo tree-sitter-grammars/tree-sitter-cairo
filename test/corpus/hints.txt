@@ -7,15 +7,16 @@ func no_hint{}():
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (implicit_arguments)
-                (arguments)
-                (code_block
-                    (code_element_return))))))
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (implicit_arguments)
+      (arguments)
+      (return_statement
+        (tuple_expression)))))
+
 ===
 One hint
 ===
@@ -25,18 +26,20 @@ func one_hint{syscall_ptr: felt*}():
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (implicit_arguments
-                    (identifier)
-                    (type
-                        (type)))
-                (arguments)
-                (code_block
-                    (code_element_return))))))
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (implicit_arguments
+        (typed_identifier
+          (identifier)
+          (type
+            (pointer_type
+              (builtin_type)))))
+      (arguments)
+      (return_statement
+        (tuple_expression)))))
 
 ===
 Three hints
@@ -51,20 +54,24 @@ func three_hints{
 end
 
 ---
-(cairo_file
-    (code_block
-        (code_element_function
-            (func
-                (identifier)
-                (implicit_arguments
-                    (identifier)
-                    (type
-                        (type))
-                    (identifier)
-                    (type
-                        (type
-                            (identifier)))
-                    (identifier))
-                (arguments)
-                (code_block
-                    (code_element_return))))))
+
+(program
+  (cairo_0_file
+    (function_definition
+      (identifier)
+      (implicit_arguments
+        (typed_identifier
+          (identifier)
+          (type
+            (pointer_type
+              (builtin_type))))
+        (typed_identifier
+          (identifier)
+          (type
+            (pointer_type
+              (identifier))))
+        (typed_identifier
+          (identifier)))
+      (arguments)
+      (return_statement
+        (tuple_expression)))))

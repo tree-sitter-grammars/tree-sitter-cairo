@@ -1,53 +1,64 @@
 ===
 Simple import
 ===
+
 from starkware.cairo.common.alloc import alloc
+
 ---
-(cairo_file
-    (code_block
-        (code_element_import
-            (identifier)
-            (identifier)
-            (identifier)
-            (identifier)
-            (import_body
-                (aliased_identifier
-                    (identifier))))))
+
+(program
+  (cairo_0_file
+    (import_statement
+      (dotted_name
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))
+      (dotted_name
+        (identifier)))))
 
 ===
-Multiple import
+Multiple imports
 ===
+
 from starkware.cairo.common.math import split_felt, unsigned_div_rem
+
 ---
-(cairo_file
-    (code_block
-        (code_element_import
-            (identifier)
-            (identifier)
-            (identifier)
-            (identifier)
-            (import_body
-                (aliased_identifier
-                    (identifier))
-                (aliased_identifier
-                    (identifier))))))
+
+(program
+  (cairo_0_file
+    (import_statement
+      (dotted_name
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))
+      (dotted_name
+        (identifier))
+      (dotted_name
+        (identifier)))))
 
 ===
-Import aliased
+Aliased import
 ===
+
 from starkware.cairo.common.uint256 import Uint256 as u, toto as tata
+
 ---
-(cairo_file
-    (code_block
-        (code_element_import
-            (identifier)
-            (identifier)
-            (identifier)
-            (identifier)
-            (import_body
-                (aliased_identifier
-                    (identifier)
-                    (identifier))
-                (aliased_identifier
-                    (identifier)
-                    (identifier))))))
+
+(program
+  (cairo_0_file
+    (import_statement
+      (dotted_name
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier))
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier)))))

@@ -5,11 +5,11 @@ Builtin directive
 %builtins abc
 
 ---
-(cairo_file
-    (code_block
-        (code_element_directive
-            (builtin_directive
-                (identifier)))))
+
+(program
+  (cairo_0_file
+    (builtin_directive
+      (identifier))))
 
 ===
 Lang directive
@@ -18,11 +18,11 @@ Lang directive
 %lang abc
 
 ---
-(cairo_file
-    (code_block
-        (code_element_directive
-            (lang_directive
-                (identifier)))))
+
+(program
+  (cairo_0_file
+    (lang_directive
+      (identifier))))
 
 ===
 Mix directive
@@ -33,14 +33,12 @@ Mix directive
 %lang ghi
 
 ---
-(cairo_file
-    (code_block
-        (code_element_directive
-            (lang_directive
-                (identifier)))
-        (code_element_directive
-            (builtin_directive
-                (identifier)))
-        (code_element_directive
-            (lang_directive
-                (identifier))))) 
+
+(program
+  (cairo_0_file
+    (lang_directive
+      (identifier))
+    (builtin_directive
+      (identifier))
+    (lang_directive
+      (identifier))))
