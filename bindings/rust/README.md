@@ -16,14 +16,23 @@ Typically, you will use the [language][language func] function to add this
 grammar to a tree-sitter [Parser][], and then use the parser to parse some code:
 
 ```rust
-let code = r#"
+let cairo_0_code = r#"
 func uint256_signed_lt{range_check_ptr}(a: Uint256, b: Uint256) -> (res: felt) {
     let (a, _) = uint256_add(a, cast((low=0, high=2 ** 127), Uint256));
 }
 "#;
 let mut parser = Parser::new();
 parser.set_language(tree_sitter_cairo::language()).expect("Error loading Cairo grammar");
-let parsed = parser.parse(code, None);
+let cairo_0_parsed = parser.parse(code, None);
+
+let cairo_1_code = r#"
+impl ArrayIndex<T> of IndexView<Array<T>, usize, @T> {
+    fn index(self: @Array<T>, index: usize) -> @T {
+        array_at(self, index).unbox()
+    }
+}
+"#;
+let cairo_1_parsed = parser.parse(code, None);
 ```
 
 If you have any questions, please reach out to us in the [tree-sitter
