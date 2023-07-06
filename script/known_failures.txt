@@ -1,0 +1,4 @@
+examples/cairo/crates/cairo-lang-parser/test_data/cairo_files/colored.cairo
+examples/cairo/crates/cairo-lang-parser/test_data/cairo_files/test1.cairo
+examples/cairo/crates/cairo-lang-parser/test_data/cairo_files/test2.cairo
+examples/cairo/tests/bug_samples/issue3130.cairo

@@ -25,8 +25,8 @@ function clone_repo {
 	popd >/dev/null
 }
 
-# clone_repo starkware-libs cairo 6f71adc5af2e2d93747498e8baa5187151809b95
-clone_repo starkware-libs cairo-lang 12ca9e91bbdc8a423c63280949c7e34382792067
+clone_repo starkware-libs cairo-lang c98fc0b50529185b7018208cb3460191eeb53e0d
+clone_repo starkware-libs cairo bc3b5e825e5c131e45115c4f7f62fbe1f19a33ec
 
 known_failures="$(cat script/known_failures.txt)"
 
