@@ -27,7 +27,8 @@ module.exports = grammar({
     [$.typed_identifier, $._pattern],
     [$._cairo_1_expression, $._cairo_1_struct_expression],
     [$.tuple_pattern, $._ref_binding],
-    [$.struct_definition, $.field_declaration_list],
+    [$._cairo_0_struct_definition, $.field_declaration_list],
+    [$._cairo_0_tuple_type, $.unit_type],
   ],
 
   externals: $ => [

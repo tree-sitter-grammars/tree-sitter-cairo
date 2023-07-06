@@ -12,32 +12,32 @@ module.exports = {
   // │ Cairo 0.x Parser │
   // ╰──────────────────╯
   _cairo_0_statement: $ => choice(
-    $.import_statement,
+    alias($._cairo_0_import_statement, $.import_statement),
     $.type_definition,
     $.builtin_directive,
     $.lang_directive,
-    $.decorated_definition,
-    $.namespace_definition,
-    $.struct_definition,
+    alias($._cairo_0_decorated_definition, $.decorated_definition),
+    alias($._cairo_0_namespace_definition, $.namespace_definition),
+    alias($._cairo_0_struct_definition, $.struct_definition),
     alias($._cairo_0_function_definition, $.function_definition),
-    $.expression_statement,
+    alias($._cairo_0_expression_statement, $.expression_statement),
     $.alloc_locals,
-    $.assert_statement,
-    $.static_assert_statement,
-    $.let_binding,
+    alias($._cairo_0_assert_statement, $.assert_statement),
+    alias($._cairo_0_static_assert_statement, $.static_assert_statement),
+    alias($._cairo_0_let_binding, $.let_binding),
     $.const_var_declaration,
     $.local_var_declaration,
     $.temp_var_declaration,
     $.instruction,
     $.hint,
     $.label,
-    $.attribute_statement,
-    $.if_statement,
-    $.with_statement,
-    $.return_statement,
+    alias($._cairo_0_attribute_statement, $.attribute_statement),
+    alias($._cairo_0_if_statement, $.if_statement),
+    alias($._cairo_0_with_statement, $.with_statement),
+    alias($._cairo_0_return_statement, $.return_statement),
   ),
 
-  import_statement: $ => seq(
+  _cairo_0_import_statement: $ => seq(
     'from',
     field('module_name', $.dotted_name),
     'import',
@@ -73,11 +73,11 @@ module.exports = {
     '%lang', $.identifier,
   ),
 
-  decorated_definition: $ => seq(
+  _cairo_0_decorated_definition: $ => seq(
     repeat1($.decorator),
     field('definition', choice(
-      $.namespace_definition,
-      $.struct_definition,
+      alias($._cairo_0_namespace_definition, $.namespace_definition),
+      alias($._cairo_0_struct_definition, $.struct_definition),
       alias($._cairo_0_function_definition, $.function_definition),
     )),
   ),
@@ -87,13 +87,13 @@ module.exports = {
     $.identifier,
   ),
 
-  namespace_definition: $ => seq(
+  _cairo_0_namespace_definition: $ => seq(
     'namespace', $.identifier, '{',
     repeat($._cairo_0_statement),
     '}',
   ),
 
-  struct_definition: $ => seq(
+  _cairo_0_struct_definition: $ => seq(
     'struct', $.identifier, '{',
     optionalCommaSep($.typed_identifier),
     '}',
@@ -104,10 +104,13 @@ module.exports = {
     $.identifier,
     optional($.implicit_arguments),
     $.arguments,
-    optional(seq('->', alias(
-      choice($._cairo_0_type, $.arguments),
-      $.return_type,
-    ))),
+    optional(seq(
+      '->',
+      alias(
+        $._cairo_0_type,
+        $.return_type,
+      ),
+    )),
     choice(
       seq('{', repeat($._cairo_0_statement), '}'),
       seq(':', repeat($._cairo_0_statement), 'end'),
@@ -127,39 +130,39 @@ module.exports = {
     ')',
   ),
 
-  expression_statement: $ => seq(alias($._cairo_0_expression, $.expression), $._separator),
+  _cairo_0_expression_statement: $ => seq($._cairo_0_expression, $._separator),
 
   alloc_locals: $ => seq('alloc_locals', $._separator),
 
-  assert_statement: $ => seq(
-    'assert', alias($._cairo_0_expression, $.expression), '=', alias($._cairo_0_expression, $.expression), $._separator,
+  _cairo_0_assert_statement: $ => seq(
+    'assert', $._cairo_0_expression, '=', $._cairo_0_expression, $._separator,
   ),
 
-  static_assert_statement: $ => seq(
-    'static_assert', alias($._cairo_0_expression, $.expression), '==', alias($._cairo_0_expression, $.expression), $._separator,
+  _cairo_0_static_assert_statement: $ => seq(
+    'static_assert', $._cairo_0_expression, '==', $._cairo_0_expression, $._separator,
   ),
 
-  let_binding: $ => seq(
+  _cairo_0_let_binding: $ => seq(
     'let',
     field('left', $._ref_binding),
     '=',
     field('right', choice(
       $.call_instruction,
-      alias($._cairo_0_expression, $.expression),
+      $._cairo_0_expression,
     )),
     $._separator,
   ),
 
   const_var_declaration: $ => seq(
-    'const', $.identifier, '=', alias($._cairo_0_expression, $.expression), $._separator,
+    'const', $.identifier, '=', $._cairo_0_expression, $._separator,
   ),
 
   local_var_declaration: $ => seq(
-    'local', $.typed_identifier, optional(seq('=', alias($._cairo_0_expression, $.expression))), $._separator,
+    'local', $.typed_identifier, optional(seq('=', $._cairo_0_expression)), $._separator,
   ),
 
   temp_var_declaration: $ => seq(
-    'tempvar', $.typed_identifier, optional(seq('=', alias($._cairo_0_expression, $.expression))), $._separator,
+    'tempvar', $.typed_identifier, optional(seq('=', $._cairo_0_expression)), $._separator,
   ),
 
   instruction: $ => choice(
@@ -183,15 +186,15 @@ module.exports = {
   ),
 
   inst_assert_eq: $ => seq(
-    alias($._cairo_0_expression, $.expression), '=', alias($._cairo_0_expression, $.expression),
+    $._cairo_0_expression, '=', $._cairo_0_expression,
   ),
 
   inst_jmp_rel: $ => seq(
-    'jmp', 'rel', alias($._cairo_0_expression, $.expression),
+    'jmp', 'rel', $._cairo_0_expression,
   ),
 
   inst_jmp_abs: $ => seq(
-    'jmp', 'abs', alias($._cairo_0_expression, $.expression),
+    'jmp', 'abs', $._cairo_0_expression,
   ),
 
   inst_jmp_to_label: $ => seq(
@@ -199,26 +202,26 @@ module.exports = {
   ),
 
   inst_jnz: $ => prec(1, seq(
-    'jmp', 'rel', alias($._cairo_0_expression, $.expression), 'if', alias($._cairo_0_expression, $.expression), '!=', $.number,
+    'jmp', 'rel', $._cairo_0_expression, 'if', $._cairo_0_expression, '!=', $.number,
   )),
 
   inst_jnz_to_label: $ => prec(1, seq(
-    'jmp', $.identifier, 'if', alias($._cairo_0_expression, $.expression), '!=', $.number,
+    'jmp', $.identifier, 'if', $._cairo_0_expression, '!=', $.number,
   )),
 
   inst_ret: _ => 'ret',
 
   inst_add_ap: $ => seq(
-    'ap', '+=', alias($._cairo_0_expression, $.expression),
+    'ap', '+=', $._cairo_0_expression,
   ),
 
   inst_data_word: $ => seq(
-    'dw', alias($._cairo_0_expression, $.expression),
+    'dw', $._cairo_0_expression,
   ),
 
   label: $ => seq($.identifier, ':', $._cairo_0_statement),
 
-  attribute_statement: $ => seq(
+  _cairo_0_attribute_statement: $ => seq(
     'with_attr',
     $.identifier,
     optional(seq('(', repeat($.string), ')')),
@@ -227,10 +230,10 @@ module.exports = {
     '}',
   ),
 
-  if_statement: $ => seq(
+  _cairo_0_if_statement: $ => seq(
     'if',
     '(',
-    alias($._cairo_0_expression, $.expression),
+    $._cairo_0_expression,
     ')',
     '{',
     repeat($._cairo_0_statement),
@@ -238,36 +241,38 @@ module.exports = {
     '}',
   ),
 
-  with_statement: $ => seq(
+  _cairo_0_with_statement: $ => seq(
     'with', commaSep1($.identifier), '{',
     repeat($._cairo_0_statement),
     '}',
   ),
 
-  return_statement: $ => seq(
-    'return', alias($._cairo_0_expression, $.expression), $._separator,
+  _cairo_0_return_statement: $ => seq(
+    'return', $._cairo_0_expression, $._separator,
   ),
 
-  non_identifier_type: $ => choice(
-    'felt',
-    'codeoffset',
-    seq(alias($._cairo_0_type, $.type), '*'),
-    seq(alias($._cairo_0_type, $.type), '**'),
-    seq('(', commaSep1($.named_type), ')'),
+  _non_identifier_type: $ => choice(
+    alias($._cairo_0_builtin_type, $.builtin_type),
+    alias($._cairo_0_pointer_type, $.pointer_type),
+    alias($._cairo_0_tuple_type, $.tuple_type),
     $.hint,
   ),
 
+  _cairo_0_builtin_type: _ => choice('felt', 'codeoffset'),
+
+  _cairo_0_pointer_type: $ => seq(choice($._non_identifier_type, $.identifier), choice('*', '**')),
+
+  _cairo_0_tuple_type: $ => seq('(', commaSep($._cairo_0_type), ')'),
+
   _cairo_0_type: $ => choice(
-    $.non_identifier_type,
+    $._non_identifier_type,
     $.named_type,
+    $.identifier,
   ),
 
-  named_type: $ => prec.right(1, choice(
-    seq(
-      $.identifier,
-      optional(seq(':', alias($._cairo_0_type, $.type))),
-    ),
-    $.non_identifier_type,
+  named_type: $ => prec.right(1, seq(
+    $.identifier,
+    optional(seq(':', alias($._cairo_0_type, $.type))),
   )),
 
   _cairo_0_expression: $ => choice(
@@ -291,7 +296,7 @@ module.exports = {
   unary_expression: $ => prec.left(PREC.UNARY,
     seq(
       field('operator', choice('&', '-', 'new')),
-      field('operand', alias($._cairo_0_expression, $.expression)),
+      field('operand', $._cairo_0_expression),
     ),
   ),
 
@@ -309,17 +314,17 @@ module.exports = {
 
     // @ts-ignore
     return choice(...table.map(([fn, operator, precedence]) => fn(precedence, seq(
-      field('left', alias($._cairo_0_expression, $.expression)),
+      field('left', $._cairo_0_expression),
       // @ts-ignore
       field('operator', operator),
-      field('right', alias($._cairo_0_expression, $.expression)),
+      field('right', $._cairo_0_expression),
     ))));
   },
 
   assignment_expression: $ => prec.right(PREC.ASSIGN, seq(
-    field('left', alias($._cairo_0_expression, $.expression)),
+    field('left', $._cairo_0_expression),
     field('operator', '='),
-    field('right', alias($._cairo_0_expression, $.expression)),
+    field('right', $._cairo_0_expression),
   )),
 
   string: _ => /"(.*?)"/,
@@ -343,30 +348,30 @@ module.exports = {
 
   deref_expression: $ => seq(
     '[',
-    alias($._cairo_0_expression, $.expression),
+    $._cairo_0_expression,
     ']',
   ),
 
   subscript_expression: $ => prec(PREC.MEMBER, seq(
-    alias($._cairo_0_expression, $.expression), '[', alias($._cairo_0_expression, $.expression), ']',
+    $._cairo_0_expression, '[', $._cairo_0_expression, ']',
   )),
 
   member_expression: $ => prec(PREC.MEMBER, seq(
-    alias($._cairo_0_expression, $.expression), '.', $.identifier,
+    $._cairo_0_expression, '.', $.identifier,
   )),
 
   cast_expression: $ => seq(
-    'cast', '(', alias($._cairo_0_expression, $.expression), ',', alias($._cairo_0_type, $.type), ')',
+    'cast', '(', $._cairo_0_expression, ',', alias($._cairo_0_type, $.type), ')',
   ),
 
   tuple_expression: $ => prec(PREC.CALL, seq(
     '(',
-    optionalCommaSep(alias($._cairo_0_expression, $.expression)),
+    optionalCommaSep($._cairo_0_expression),
     ')',
   )),
 
   _cairo_0_call_expression: $ => prec(PREC.CALL, seq(
-    alias($._cairo_0_expression, $.expression),
+    field('function', $._cairo_0_expression),
     optional(seq(
       '{',
       commaSep($.assignment_expression),
@@ -382,8 +387,8 @@ module.exports = {
   ),
 
   call_instruction: $ => choice(
-    seq('call', 'rel', alias($._cairo_0_expression, $.expression)),
-    seq('call', 'abs', alias($._cairo_0_expression, $.expression)),
+    seq('call', 'rel', $._cairo_0_expression),
+    seq('call', 'abs', $._cairo_0_expression),
     seq('call', $.identifier),
   ),
 

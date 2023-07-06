@@ -231,7 +231,7 @@ module.exports = {
     '(',
     commaSep($.parameter),
     ')',
-    optional(seq('->', field('returns', alias($._cairo_1_type, $.type)))),
+    optional(seq('->', field('returns', $._cairo_1_type))),
     optional(seq('implicits', '(', commaSep($.identifier), ')')),
     optional('nopanic'),
   ),
@@ -243,7 +243,7 @@ module.exports = {
     '(',
     commaSep($.parameter),
     ')',
-    optional(seq('->', field('returns', alias($._cairo_1_type, $.type)))),
+    optional(seq('->', field('returns', $._cairo_1_type))),
     // optional(seq('implicits', '(', commaSep($.identifier), ')')),
     optional('nopanic'),
     ';',
@@ -251,16 +251,16 @@ module.exports = {
 
   parameter: $ => seq(
     optional(choice('ref', 'mut')),
-    $.identifier,
+    choice($.identifier, $.self),
     ':',
-    alias($._cairo_1_type, $.type),
+    $._cairo_1_type,
   ),
 
   impl_item: $ => seq(
     'impl',
-    alias($._cairo_1_type, $.type),
+    $._cairo_1_type,
     'of',
-    alias($._cairo_1_type, $.type),
+    $._cairo_1_type,
     choice(
       $.block,
       ';',
@@ -304,11 +304,11 @@ module.exports = {
   ),
 
   _cairo_1_type: $ => choice(
-    $.identifier,
+    $._cairo_1_type_identifier,
     $.scoped_type_identifier,
     $.at_type,
     $.generic_type,
-    $.tuple_type,
+    alias($._cairo_1_tuple_type, $.tuple_type),
     $.abstract_type,
     alias(choice(...primitive_types), $.primitive_type),
     $.unit_type,
@@ -317,7 +317,7 @@ module.exports = {
   // TODO: what?
   at_type: $ => seq(
     '@',
-    alias($._cairo_1_type, $.type),
+    $._cairo_1_type,
   ),
 
   _cairo_1_generic_function: $ => prec(1, seq(
@@ -327,7 +327,7 @@ module.exports = {
       alias($._cairo_1_field_expression, $.field_expression),
     )),
     '::',
-    field('type_arguments', $.type_arguments),
+    alias($._cairo_1_type_arguments, $.type_arguments),
   )),
 
   generic_type: $ => prec(1, seq(
@@ -336,7 +336,7 @@ module.exports = {
       $.scoped_type_identifier,
     )),
     optional('::'),
-    field('type_arguments', $.type_arguments),
+    alias($._cairo_1_type_arguments, $.type_arguments),
   )),
 
   generic_type_with_turbofish: $ => seq(
@@ -345,14 +345,14 @@ module.exports = {
       $.scoped_identifier,
     )),
     '::',
-    field('type_arguments', $.type_arguments),
+    alias($._cairo_1_type_arguments, $.type_arguments),
   ),
 
-  type_arguments: $ => seq(
+  _cairo_1_type_arguments: $ => seq(
     token(prec(1, '<')),
     sep1(
       choice(
-        alias($._cairo_1_type, $.type),
+        $._cairo_1_type,
         // $.type_binding,
         // $.lifetime,
         $._literal,
@@ -364,9 +364,9 @@ module.exports = {
     '>',
   ),
 
-  tuple_type: $ => seq(
+  _cairo_1_tuple_type: $ => seq(
     '(',
-    commaSep1(alias($._cairo_1_type, $.type)),
+    commaSep1($._cairo_1_type),
     optional(','),
     ')',
   ),
@@ -396,6 +396,7 @@ module.exports = {
     alias($._cairo_1_short_string, $.short_string),
     $.self,
     $._literal,
+    $.boolean,
     alias(choice(...primitive_types), $.identifier),
     alias($._cairo_1_call_expression, $.call_expression),
     alias($._cairo_1_field_expression, $.field_expression),
@@ -558,7 +559,7 @@ module.exports = {
     ),
   ),
 
-  remaining_field_pattern: $ => '..',
+  remaining_field_pattern: _ => '..',
 
   _cairo_1_unary_expression: $ => prec(PREC.UNARY, seq(
     choice('-', '*', '!', '~'),
@@ -691,7 +692,7 @@ module.exports = {
     //   $.higher_ranked_trait_bound,
     //   $.removed_trait_bound,
     // )),
-    choice(alias($._cairo_1_type, $.type)),
+    $._cairo_1_type,
   ),
 
   type_parameters: $ => prec(1, seq(
@@ -786,7 +787,9 @@ module.exports = {
     ...primitive_types,
   ), $.identifier)),
 
-  self: $ => 'self',
+  boolean: _ => choice('true', 'false'),
+
+  self: _ => 'self',
   // super: $ => 'super',
   // crate: $ => 'crate',
 };
