@@ -33,7 +33,9 @@ module.exports = grammar({
   name: 'cairo',
 
   externals: $ => [
-    $.hint,
+    '%{',
+    $.code_line,
+    $._failure,
   ],
 
   extras: $ => [/\s/, $.comment],
@@ -297,8 +299,8 @@ module.exports = grammar({
     non_identifier_type: $ => choice(
       'felt',
       'codeoffset',
-      seq( $.type, '*'),
-      seq( $.type, '**'),
+      seq($.type, '*'),
+      seq($.type, '**'),
       seq('(', commaSep1($.named_type), ')'),
       $.hint,
     ),
@@ -374,6 +376,14 @@ module.exports = grammar({
 
     hint_expression: $ => seq('nondet', $.hint),
 
+    hint: $ => seq(
+      '%{',
+      optional($.python_code),
+      '%}',
+    ),
+
+    python_code: $ => repeat1($.code_line),
+
     register: _ => choice(
       'ap',
       'fp',
@@ -416,7 +426,7 @@ module.exports = grammar({
 
     _ref_binding: $ => choice(
       $.typed_identifier,
-      seq( '(', commaSep($.typed_identifier), ')'),
+      seq('(', commaSep($.typed_identifier), ')'),
     ),
 
     call_instruction: $ => choice(
