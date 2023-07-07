@@ -30,8 +30,6 @@
 
 (scoped_use_list (self) @namespace)
 
-(scoped_identifier (self) @namespace)
-
 (scoped_identifier
   path: (identifier) @namespace)
 
