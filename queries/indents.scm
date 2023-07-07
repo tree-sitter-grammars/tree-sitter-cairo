@@ -1,5 +1,4 @@
 [
-  (import_statement)
   (mod_item)
   (struct_item)
   (enum_item)
@@ -18,6 +17,8 @@
   (enum_variant_list)
   (tuple_pattern)
 ] @indent.begin
+
+(import_statement "(") @indent.begin
 
 (block "}" @indent.end)
 (enum_item
