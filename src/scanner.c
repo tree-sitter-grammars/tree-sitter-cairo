@@ -32,7 +32,7 @@ typedef struct {
     uint8_t pst;
 } Scanner;
 
-bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+static bool scan(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     if (valid_symbols[FAILURE]) {
         return false;
     }
