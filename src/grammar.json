@@ -7898,23 +7898,5 @@
     "_cairo_0_statement",
     "_cairo_1_expression",
     "_pattern"
-  ],
-  "PREC": {
-    "PAREN": -1,
-    "ASSIGN": 1,
-    "LOGICAL_OR": 3,
-    "LOGICAL_AND": 4,
-    "EQUALITY": 7,
-    "ADDITIVE": 8,
-    "MULTIPLICATIVE": 9,
-    "SHIFT": 10,
-    "BITAND": 11,
-    "BITXOR": 12,
-    "BITOR": 13,
-    "UNARY": 14,
-    "POWER": 15,
-    "CALL": 16,
-    "MEMBER": 17
-  }
+  ]
 }
-
