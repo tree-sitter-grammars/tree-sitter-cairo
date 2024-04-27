@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1](https://github.com/tree-sitter-grammars/tree-sitter-cairo/compare/v1.0.0...v1.0.1) (2024-04-27)
+
+
+### Bug Fixes
+
+* don't autopublish for now ([ce7ae19](https://github.com/tree-sitter-grammars/tree-sitter-cairo/commit/ce7ae19dabb3fc0fb57773f6ac0a40af17adf46f))
+* mark `scan` static ([6216c6e](https://github.com/tree-sitter-grammars/tree-sitter-cairo/commit/6216c6ee5e9fc0649c4bd7b1aedd884a55bdd9ef))
+* remove self scoped identifiers as namespace ([02ec146](https://github.com/tree-sitter-grammars/tree-sitter-cairo/commit/02ec1461f11aa126d3c16abb2da284ca3ba15631))
+* require a parenthesis to indent import statements ([dfb804f](https://github.com/tree-sitter-grammars/tree-sitter-cairo/commit/dfb804f00314611efd6dc7d2a38f2a6e08de2e4b))
+
 ## 1.0.0 (2023-07-06)
 
 
